@@ -31,9 +31,11 @@ import java.util.Random;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.security.MessageDigest;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Security;
+import java.security.Signature;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Scanner;
@@ -140,22 +142,16 @@ public class Crypto {
 	return cipher.doFinal(this.secret.getEncoded());
     }
     
-    //Encrypt Padding Scheme
-    public byte[] EncryptPaddingScheme (String padding, PublicKey pubkey) throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
+    //Encrypt Padding Scheme, Mode of Operation, IVByte, Type
+    public byte[] EncryptInfomation (String temp, PublicKey pubkey) throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
 
 	Cipher cipher = Cipher.getInstance("RSA/ECB/OAEPWithSHA1AndMGF1Padding");
         cipher.init(Cipher.ENCRYPT_MODE, pubkey);
-	return cipher.doFinal(padding.getBytes());
+	return cipher.doFinal(temp.getBytes());
     }
     
     //Encrypt Mode Of Operation
-    public byte[] EncryptMode (String mode, PublicKey pubkey) throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
 
-	Cipher cipher = Cipher.getInstance("RSA/ECB/OAEPWithSHA1AndMGF1Padding");
-        cipher.init(Cipher.ENCRYPT_MODE, pubkey);
-	return cipher.doFinal(mode.getBytes());
-    }
-    
     public void EncryptFile (String path, String source, String dest, String typeofencrypt, String mode, String padding) throws FileNotFoundException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, Exception {
         
         String temp = typeofencrypt + "/" + mode + "/" + padding;
@@ -196,9 +192,11 @@ public class Crypto {
         PublicKey pubRecv = this.ReadPublicKey(path);
         byte[] SecretKeyEncrypted = this.EncryptSecretKey(pubRecv);
         
-        //Encrypt Padding Scheme and Mode Of Operation
-        byte[] PaddingEncrypted = this.EncryptPaddingScheme(padding, pubRecv);
-        byte[] ModeEncrypted = this.EncryptMode(mode, pubRecv);
+        //Encrypt Padding Scheme and Mode Of Operation and Type 
+        byte[] PaddingEncrypted = this.EncryptInfomation(padding, pubRecv);
+        byte[] ModeEncrypted = this.EncryptInfomation(mode, pubRecv);
+        byte[] TypeEncrypted = this.EncryptInfomation(typeofencrypt, pubRecv);
+        byte[] ivEncrypted = this.EncryptInfomation(ivBytes, pubRecv);
         
         //Ghi vào file output
         File output = new File (dest);
@@ -207,11 +205,13 @@ public class Crypto {
         String temp1 = "\r\n"; //chèn ý tự xuống dòng cho dễ phân biệt
         os2.write(SecretKeyEncrypted);
         os2.write(temp1.getBytes());
+        os2.write(typeofencrypt.getBytes());
+        os2.write(temp1.getBytes());
         os2.write(PaddingEncrypted);
         os2.write(temp1.getBytes());
         os2.write(ModeEncrypted);
         os2.write(temp1.getBytes());
-        os2.write(ivBytes.getBytes());
+        os2.write(ivEncrypted);
         os2.write(temp1.getBytes());
         os2.write(encrypted);
         os2.close();
@@ -219,18 +219,116 @@ public class Crypto {
     
     public void decrypt (String source, String dest, String pathkey) throws Exception {
         
-        String ivString, typeofencrypt, padding, mode;
+        String secretkey, ivString, typeofencrypt, padding, mode, temp;
         
-        File file = new File(source);
-        FileInputStream fis = new FileInputStream(file);
-        
-        File output = new File (dest);
-        FileOutputStream fos = new FileOutputStream(output);
+        BufferedReader br = new BufferedReader(new FileReader(source));
         
         PrivateKey privatekey = this.ReadPrivateKey(pathkey);
         Cipher cipher = Cipher.getInstance("RSA/ECB/OAEPWithSHA1AndMGF1Padding");
         cipher.init(Cipher.DECRYPT_MODE, privatekey);
         
+        secretkey = br.readLine();
+        typeofencrypt = br.readLine();
+        padding = br.readLine();
+        mode = br.readLine();
+        ivString = br.readLine();
+        temp = br.readLine();
         
+        br.close();
+        
+        byte[] SecretKeyDecrypt = cipher.doFinal(secretkey.getBytes());
+        byte[] TypeDecrypt = cipher.doFinal(typeofencrypt.getBytes());
+        byte[] PaddingDecrypt = cipher.doFinal(padding.getBytes());
+        byte[] ModeDecrypt = cipher.doFinal(mode.getBytes());
+        byte[] IVDecrypt = cipher.doFinal(ivString.getBytes());
+        
+        String temp2 = TypeDecrypt.toString() + "/" + ModeDecrypt.toString() + "/" + PaddingDecrypt.toString();
+        IvParameterSpec iv = new IvParameterSpec(ivString.getBytes());
+        SecretKeySpec skeySpec = new SecretKeySpec(SecretKeyDecrypt, TypeDecrypt.toString());
+        Cipher ciphercontent = Cipher.getInstance(temp2);
+        ciphercontent.init(Cipher.DECRYPT_MODE, skeySpec, iv);
+        byte[] decrypted = cipher.doFinal(temp.getBytes());
+        
+        File output = new File (dest);
+        FileOutputStream fos = new FileOutputStream(output);
+        fos.write(decrypted);
+        fos.close();
+    }
+    
+    public void Sign (String path, String pathkey) throws FileNotFoundException, IOException, Exception
+    {
+        // Read File
+        File file = new File(path);
+	FileInputStream fis = new FileInputStream(path);
+	byte[] data = new byte[(int) file.length()];
+	fis.read(data);
+	fis.close();
+        
+        //Read PrivateKey
+        PrivateKey priKey = this.ReadPrivateKey(pathkey);
+        
+        //Hash
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        byte[] hash = digest.digest(data);
+        
+        //Sign
+        Signature signature = Signature.getInstance("SHA256WithRSA");
+        signature.initSign(priKey);
+        signature.update(hash);
+        byte [] signatureBytes = signature.sign();
+        
+        //Get Filename
+        int index1 = path.lastIndexOf("/");
+        String filename = path.substring(index1+1, path.length() - 1) + ".sig";
+        
+        //Write Signature to File
+        File signfile = new File (filename);
+        FileOutputStream os = new FileOutputStream(signfile);
+        os.write(signatureBytes);
+        os.close();
+    }
+    
+    public void Verify (String pathfile, String pathfilesign, String pathkey) throws FileNotFoundException, IOException, Exception
+    {   
+        File signfile = new File (pathfilesign);
+        if (signfile.exists()) //Signature File is exits!!!
+        {
+            FileInputStream fis_sign = new FileInputStream(signfile);
+            byte[] signature = new byte[(int) signfile.length()];
+            fis_sign.read(signature);
+            fis_sign.close();
+            
+            // Read File
+            File file = new File(pathfile);
+            FileInputStream fis = new FileInputStream(pathfile);
+            byte[] data = new byte[(int) file.length()];
+            fis.read(data);
+            fis.close();
+
+            //Read PrivateKey
+            //Chỗ này tui chưa biết cách duyệt từng publickey nhen Bự
+            PublicKey pubKey = this.ReadPublicKey(pathkey);
+
+            //Hash
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(data);
+
+            //Verify
+            Signature verifier = Signature.getInstance("SHA256WithRSA");
+            verifier.initVerify(pub);
+            verifier.update(hash);
+            if (verifier.verify(signature)) 
+            {
+                System.out.println("SIGNATURE IS VALID!!!");
+            } 
+            else 
+            {
+                System.out.println("SIGNATURE IS INVALID!!!");
+            }
+        }
+        else
+        {
+            System.out.println("SIGNATURE FILE IS NOT EXISTS!!!");
+        }
     }
 }
