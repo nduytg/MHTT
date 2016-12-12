@@ -154,13 +154,17 @@ public class User {
         user.appendChild(AddElement);
 
         //Hash with salt
-        String salt = this.RandomString(32);
+        String salt = this.RandomString(64);
         String data = salt + pass;
-//      KeySpec spec = new PBEKeySpec(pass.toCharArray(), salt.getBytes(), 65536, 128);
-//      SecretKeyFactory f = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
-//      byte[] hash = f.generateSecret(spec).getEncoded();
+
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
-        byte[] hash = digest.digest(data.getBytes());
+        digest.update(data.getBytes());
+        byte[] md = digest.digest();
+        StringBuffer hash = new StringBuffer();
+        for (int i = 0; i < md.length; i++) 
+        {
+            hash.append(Integer.toString((md[i] & 0xff) + 0x100, 16).substring(1));
+        }
 
         //Passphrase elements
         Element PassElement = doc.createElement("Passphrase");
@@ -169,7 +173,7 @@ public class User {
 
         //Salt elements
         Element SaltElement = doc.createElement("Salt");
-        SaltElement.appendChild(doc.createTextNode(salt));
+        SaltElement.appendChild(doc.createTextNode(salt.toString()));
         user.appendChild(SaltElement);
         
         TransformerFactory transformerFactory = TransformerFactory.newInstance();
@@ -239,13 +243,20 @@ public class User {
             user.appendChild(AddElement);
             
             //Hash with salt
-            String salt = this.RandomString(32);
+            String salt = this.RandomString(64);
             String data = salt + pass;
-//            KeySpec spec = new PBEKeySpec(pass.toCharArray(), salt.getBytes(), 65536, 128);
-//            SecretKeyFactory f = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
-//            byte[] hash = f.generateSecret(spec).getEncoded();
+
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] hash = digest.digest(data.getBytes());
+            digest.update(data.getBytes());
+            byte[] md = digest.digest();
+            StringBuffer hash = new StringBuffer();
+            for (int i = 0; i < md.length; i++) 
+            {
+                hash.append(Integer.toString((md[i] & 0xff) + 0x100, 16).substring(1));
+            }
+            System.out.println(salt);
+            System.out.println(data);
+            System.out.println(hash.toString());
 
             //Passphrase elements
             Element PassElement = doc.createElement("Passphrase");
@@ -267,8 +278,50 @@ public class User {
         }
     }
     
-    public void Log_In (String email, String pass) {
+    public boolean Log_In (String email, String pass) throws SAXException, IOException, ParserConfigurationException, NoSuchAlgorithmException {
         
+        String filepath = "Database.xml";
+        DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+	DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+	Document doc = docBuilder.parse(filepath);
+        
+        // Get the root element
+	Node Data = doc.getFirstChild();
+        NodeList nList = doc.getElementsByTagName("User");
+        
+        for (int i = 0; i < nList.getLength(); i++) 
+        {
+            Node nNode = nList.item(i);
+            
+            if (nNode.getNodeType() == Node.ELEMENT_NODE) 
+            {
+		Element eElement = (Element) nNode;
+                if ((eElement.getElementsByTagName("Email").item(0).getTextContent().equals(email)))
+                {
+                    String salt = eElement.getElementsByTagName("Salt").item(0).getTextContent();
+                    String data = salt + pass;
+                    
+                    MessageDigest digest = MessageDigest.getInstance("SHA-256");
+                    digest.update(data.getBytes());
+                    byte[] md = digest.digest();
+                    StringBuffer hash = new StringBuffer();
+                    for (int j = 0; j < md.length; j++) 
+                    {
+                        hash.append(Integer.toString((md[j] & 0xff) + 0x100, 16).substring(1));
+                    }
+                    
+                    if ((eElement.getElementsByTagName("Passphrase").item(0).getTextContent().equals(hash.toString())))
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+            }
+        }
+        return false;
     }
     
     public void Update (String email, String name, String dateofbirth, String phone, String add, String pass) throws SAXException, ParserConfigurationException, IOException, NoSuchAlgorithmException, TransformerException, InvalidKeySpecException {
@@ -309,26 +362,34 @@ public class User {
                     }
 
                     String tempsalt = eElement.getElementsByTagName("Salt").item(0).getTextContent();
-//                    KeySpec tempspec = new PBEKeySpec(pass.toCharArray(), tempsalt.getBytes(), 65536, 128);
-//                    SecretKeyFactory tempf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
-//                    byte[] temphash = tempf.generateSecret(tempspec).getEncoded();
                     String tempdata = tempsalt + pass;
+                    
                     MessageDigest tempdigest = MessageDigest.getInstance("SHA-256");
-                    byte[] temphash = tempdigest.digest(tempdata.getBytes());
+                    tempdigest.update(tempdata.getBytes());
+                    byte[] tempmd = tempdigest.digest();
+                    StringBuffer temphash = new StringBuffer();
+                    for (int j = 0; j < tempmd.length; j++) 
+                    {
+                        temphash.append(Integer.toString((tempmd[j] & 0xff) + 0x100, 16).substring(1));
+                    }
                     
                     if (!(eElement.getElementsByTagName("Passphrase").item(0).getTextContent().equals(temphash.toString())))
                     {
-                        //Hash with salt
-                        String salt = this.RandomString(32);
+                       
+                        String salt = this.RandomString(64);
                         String data = salt + pass;
-//                      KeySpec spec = new PBEKeySpec(pass.toCharArray(), salt.getBytes(), 65536, 128);
-//                      SecretKeyFactory f = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
-//                      byte[] hash = f.generateSecret(spec).getEncoded();
-                        MessageDigest digest = MessageDigest.getInstance("SHA-256");
-                        byte[] hash = digest.digest(data.getBytes());
 
+                        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+                        digest.update(data.getBytes());
+                        byte[] md = digest.digest();
+                        StringBuffer hash = new StringBuffer();
+                        for (int j = 0; j < md.length; j++) 
+                        {
+                            hash.append(Integer.toString((md[j] & 0xff) + 0x100, 16).substring(1));
+                        }
+           
                         eElement.getElementsByTagName("Passphrase").item(0).setTextContent(hash.toString());
-                        eElement.getElementsByTagName("Salt").item(0).setTextContent(salt);
+                        eElement.getElementsByTagName("Salt").item(0).setTextContent(salt.toString());
                     }
                 }
             }
@@ -344,8 +405,16 @@ public class User {
     public static void main(String[] args) throws Exception {
         
         User user = new User();
-        user.Sign_In("quangdai255@gmail.com", "Đinh Quang Đại", "25/05/1995", "01686871317", "Quận 8, HCM", "Qd25051995!");
-        //user.Sign_In("quanghung@gmail.com", "Đinh Quang Hùng", "07/07/1996", "01694437617", "Quận 10, HCM", "1234567");
+        //user.Sign_In("quangdai255@gmail.com", "Đinh Quang Đại", "25/05/1995", "01686871317", "Quận 8, HCM", "Qd25051995!");
+        //user.Update("quangdai255@gmail.com", "Đinh Quang Đại", "25/05/1995", "01686871317", "Quận 8, HCM", "Qd25051995!");
+//        if (user.Log_In("quangdai255@gmail.com", "Qd25051995!"))
+//        {
+//            System.out.println("Successfully!!!");
+//        }
+//        else
+//        {
+//            System.out.println("Not Successfully!!!");
+//        }
         //user.Sign_In("quangkhanh@gmail.com", "Đinh Quang Khánh", "19/05/1998", "01681234556", "Quận Thủ Đức, HCM", "123abcd");
         //user.Sign_In("quanganh@gmail.com", "Đinh Quang Khánh", "19/05/1998", "01681234556", "Quận Thủ Đức, HCM", "123abcd");
         //user.Update("quangdai255@gmail.com", "Đinh Quang Đại", "25/05/1995", "01686871317", "Quận 8, HCM", "Qd25051995!");
