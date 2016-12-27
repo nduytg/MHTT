@@ -3,52 +3,14 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package pkg1312084.pkg1312110;
+package Users;
 
-import static com.sun.org.apache.xalan.internal.lib.ExsltMath.random;
-import java.io.BufferedReader;
-import java.io.DataInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileReader;
+import java.io.*;
 import java.io.IOException;
-import static java.lang.Math.random;
-import static java.lang.StrictMath.random;
-import static java.lang.System.exit;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.util.Base64;
-import java.util.Scanner;
-import javax.crypto.Cipher;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
-import java.util.UUID;
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import java.util.Random;
-import java.security.KeyFactory;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
 import java.security.MessageDigest;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.Security;
-import java.security.Signature;
+import java.security.NoSuchAlgorithmException;
+import java.util.Random;
 import java.security.spec.InvalidKeySpecException;
-import java.security.spec.KeySpec;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
-import java.util.Scanner;
-import javax.crypto.Cipher;
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -58,8 +20,8 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import static jdk.nashorn.internal.objects.NativeMath.random;
-import static org.bouncycastle.math.raw.Mod.random;
+//import static jdk.nashorn.internal.objects.NativeMath.random;
+//import static org.bouncycastle.math.raw.Mod.random;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
@@ -344,52 +306,55 @@ public class User {
 		Element eElement = (Element) nNode;
                 if ((eElement.getElementsByTagName("Email").item(0).getTextContent().equals(email)))
                 {
-                    if (!(eElement.getElementsByTagName("Name").item(0).getTextContent().equals(name)))
+                    if ((!(eElement.getElementsByTagName("Name").item(0).getTextContent().equals(name))) && (!name.equals("")))
                     {
                         eElement.getElementsByTagName("Name").item(0).setTextContent(name);
                     }
-                    if (!(eElement.getElementsByTagName("DateOfBirth").item(0).getTextContent().equals(dateofbirth)))
+                    if ((!(eElement.getElementsByTagName("DateOfBirth").item(0).getTextContent().equals(dateofbirth))) && (!dateofbirth.equals("")))
                     {
                         eElement.getElementsByTagName("DateOfBirth").item(0).setTextContent(dateofbirth);
                     }
-                    if (!(eElement.getElementsByTagName("Phone").item(0).getTextContent().equals(phone)))
+                    if ((!(eElement.getElementsByTagName("Phone").item(0).getTextContent().equals(phone))) && (!phone.equals("")))
                     {
                         eElement.getElementsByTagName("Phone").item(0).setTextContent(phone);
                     }
-                    if (!(eElement.getElementsByTagName("Address").item(0).getTextContent().equals(add)))
+                    if ((!(eElement.getElementsByTagName("Address").item(0).getTextContent().equals(add))) && (!add.equals("")))
                     {
                         eElement.getElementsByTagName("Address").item(0).setTextContent(add);
                     }
-
-                    String tempsalt = eElement.getElementsByTagName("Salt").item(0).getTextContent();
-                    String tempdata = tempsalt + pass;
                     
-                    MessageDigest tempdigest = MessageDigest.getInstance("SHA-256");
-                    tempdigest.update(tempdata.getBytes());
-                    byte[] tempmd = tempdigest.digest();
-                    StringBuffer temphash = new StringBuffer();
-                    for (int j = 0; j < tempmd.length; j++) 
+                    if (!pass.equals(""))
                     {
-                        temphash.append(Integer.toString((tempmd[j] & 0xff) + 0x100, 16).substring(1));
-                    }
-                    
-                    if (!(eElement.getElementsByTagName("Passphrase").item(0).getTextContent().equals(temphash.toString())))
-                    {
-                       
-                        String salt = this.RandomString(64);
-                        String data = salt + pass;
+                        String tempsalt = eElement.getElementsByTagName("Salt").item(0).getTextContent();
+                        String tempdata = tempsalt + pass;
 
-                        MessageDigest digest = MessageDigest.getInstance("SHA-256");
-                        digest.update(data.getBytes());
-                        byte[] md = digest.digest();
-                        StringBuffer hash = new StringBuffer();
-                        for (int j = 0; j < md.length; j++) 
+                        MessageDigest tempdigest = MessageDigest.getInstance("SHA-256");
+                        tempdigest.update(tempdata.getBytes());
+                        byte[] tempmd = tempdigest.digest();
+                        StringBuffer temphash = new StringBuffer();
+                        for (int j = 0; j < tempmd.length; j++) 
                         {
-                            hash.append(Integer.toString((md[j] & 0xff) + 0x100, 16).substring(1));
+                            temphash.append(Integer.toString((tempmd[j] & 0xff) + 0x100, 16).substring(1));
                         }
-           
-                        eElement.getElementsByTagName("Passphrase").item(0).setTextContent(hash.toString());
-                        eElement.getElementsByTagName("Salt").item(0).setTextContent(salt.toString());
+
+                        if (!(eElement.getElementsByTagName("Passphrase").item(0).getTextContent().equals(temphash.toString())))
+                        {
+
+                            String salt = this.RandomString(64);
+                            String data = salt + pass;
+
+                            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+                            digest.update(data.getBytes());
+                            byte[] md = digest.digest();
+                            StringBuffer hash = new StringBuffer();
+                            for (int j = 0; j < md.length; j++) 
+                            {
+                                hash.append(Integer.toString((md[j] & 0xff) + 0x100, 16).substring(1));
+                            }
+
+                            eElement.getElementsByTagName("Passphrase").item(0).setTextContent(hash.toString());
+                            eElement.getElementsByTagName("Salt").item(0).setTextContent(salt.toString());
+                        }
                     }
                 }
             }
@@ -402,21 +367,39 @@ public class User {
         transformer.transform(source, result);
     }
     
-    public static void main(String[] args) throws Exception {
+    public boolean Delete (String email) throws SAXException, IOException, ParserConfigurationException, TransformerException
+    {
+        boolean check = false;
+        String filepath = "Database.xml";
+        DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+	DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+	Document doc = docBuilder.parse(filepath);
         
-        User user = new User();
-        //user.Sign_In("quangdai255@gmail.com", "Đinh Quang Đại", "25/05/1995", "01686871317", "Quận 8, HCM", "Qd25051995!");
-        //user.Update("quangdai255@gmail.com", "Đinh Quang Đại", "25/05/1995", "01686871317", "Quận 8, HCM", "Qd25051995!");
-//        if (user.Log_In("quangdai255@gmail.com", "Qd25051995!"))
-//        {
-//            System.out.println("Successfully!!!");
-//        }
-//        else
-//        {
-//            System.out.println("Not Successfully!!!");
-//        }
-        //user.Sign_In("quangkhanh@gmail.com", "Đinh Quang Khánh", "19/05/1998", "01681234556", "Quận Thủ Đức, HCM", "123abcd");
-        //user.Sign_In("quanganh@gmail.com", "Đinh Quang Khánh", "19/05/1998", "01681234556", "Quận Thủ Đức, HCM", "123abcd");
-        //user.Update("quangdai255@gmail.com", "Đinh Quang Đại", "25/05/1995", "01686871317", "Quận 8, HCM", "Qd25051995!");
+        // Get the root element
+	Node Data = doc.getFirstChild();
+        NodeList nList = doc.getElementsByTagName("User");
+        
+        for (int i = 0; i < nList.getLength(); i++) 
+        {
+            Node nNode = nList.item(i);
+            
+            if (nNode.getNodeType() == Node.ELEMENT_NODE) 
+            {
+		Element eElement = (Element) nNode;
+                if ((eElement.getElementsByTagName("Email").item(0).getTextContent().equals(email)))
+                {
+                    Data.removeChild(nNode);
+                    check = true;
+                }
+            }
+        }
+        
+        TransformerFactory transformerFactory = TransformerFactory.newInstance();
+        Transformer transformer = transformerFactory.newTransformer();
+        DOMSource source = new DOMSource(doc);
+        StreamResult result = new StreamResult(new File(filepath));
+        transformer.transform(source, result);
+        
+        return check;
     }
 }
