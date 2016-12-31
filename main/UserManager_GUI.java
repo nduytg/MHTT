@@ -6,6 +6,7 @@
 package main;
 
 import DCrypto.*;
+import Users.*;
 import Users.GUI.CreateAccount_GUI;
 import Users.GUI.Delete_GUI;
 import Users.GUI.ModifyAccount_GUI;
@@ -23,6 +24,7 @@ import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
@@ -83,6 +85,38 @@ public class UserManager_GUI extends javax.swing.JFrame {
         FileButton_3 = new javax.swing.JButton();
         FileButton_4 = new javax.swing.JButton();
         TabbedPane = new javax.swing.JTabbedPane();
+        AccountPane = new javax.swing.JPanel();
+        AccountInfo = new javax.swing.JPanel();
+        HoTenLabel = new javax.swing.JLabel();
+        EmailLabel = new javax.swing.JLabel();
+        AddrLabel = new javax.swing.JLabel();
+        PhoneLabel = new javax.swing.JLabel();
+        DoBLabel = new javax.swing.JLabel();
+        LoginButton = new javax.swing.JButton();
+        ExportInfoButton = new javax.swing.JButton();
+        UpdateAccButton = new javax.swing.JButton();
+        NameField = new javax.swing.JTextField();
+        EmailTextField = new javax.swing.JTextField();
+        PhoneTextField = new javax.swing.JTextField();
+        AddrTextField = new javax.swing.JTextField();
+        PasswordLabel = new javax.swing.JLabel();
+        PasswordField = new javax.swing.JPasswordField();
+        DoBTextField = new javax.swing.JFormattedTextField();
+        CreateAccountButton = new javax.swing.JButton();
+        jSeparator4 = new javax.swing.JSeparator();
+        KeyPairInfo = new javax.swing.JPanel();
+        jScrollPane3 = new javax.swing.JScrollPane();
+        jTextArea1 = new javax.swing.JTextArea();
+        jScrollPane4 = new javax.swing.JScrollPane();
+        jTextArea2 = new javax.swing.JTextArea();
+        jSeparator1 = new javax.swing.JSeparator();
+        jLabel7 = new javax.swing.JLabel();
+        jLabel8 = new javax.swing.JLabel();
+        KeySizeComboBox1 = new javax.swing.JComboBox<>();
+        CreateKeyPairButton1 = new javax.swing.JButton();
+        ExportPrivate1 = new javax.swing.JButton();
+        jLabel11 = new javax.swing.JLabel();
+        jLabel10 = new javax.swing.JLabel();
         ContactsPane = new javax.swing.JPanel();
         ScrollUserPane = new javax.swing.JScrollPane();
         UserTable = new javax.swing.JTable();
@@ -112,37 +146,6 @@ public class UserManager_GUI extends javax.swing.JFrame {
         jScrollPane1 = new javax.swing.JScrollPane();
         CommandLine = new javax.swing.JTextArea();
         KeySizeComboBox = new javax.swing.JComboBox<>();
-        AccountPane = new javax.swing.JPanel();
-        AccountInfo = new javax.swing.JPanel();
-        HoTenLabel = new javax.swing.JLabel();
-        EmailLabel = new javax.swing.JLabel();
-        AddrLabel = new javax.swing.JLabel();
-        PhoneLabel = new javax.swing.JLabel();
-        jLabel9 = new javax.swing.JLabel();
-        jButton1 = new javax.swing.JButton();
-        jButton2 = new javax.swing.JButton();
-        jButton3 = new javax.swing.JButton();
-        jButton4 = new javax.swing.JButton();
-        jTextField1 = new javax.swing.JTextField();
-        jTextField2 = new javax.swing.JTextField();
-        jTextField4 = new javax.swing.JTextField();
-        jTextField5 = new javax.swing.JTextField();
-        jLabel3 = new javax.swing.JLabel();
-        jPasswordField1 = new javax.swing.JPasswordField();
-        jFormattedTextField1 = new javax.swing.JFormattedTextField();
-        KeyPairInfo = new javax.swing.JPanel();
-        jButton6 = new javax.swing.JButton();
-        jButton8 = new javax.swing.JButton();
-        jScrollPane3 = new javax.swing.JScrollPane();
-        jTextArea1 = new javax.swing.JTextArea();
-        jScrollPane4 = new javax.swing.JScrollPane();
-        jTextArea2 = new javax.swing.JTextArea();
-        jSeparator1 = new javax.swing.JSeparator();
-        jLabel7 = new javax.swing.JLabel();
-        jLabel8 = new javax.swing.JLabel();
-        KeySizeComboBox1 = new javax.swing.JComboBox<>();
-        CreateKeyPairButton1 = new javax.swing.JButton();
-        ExportPrivate1 = new javax.swing.JButton();
         MenuBar = new javax.swing.JMenuBar();
         Help = new javax.swing.JMenu();
         About = new javax.swing.JMenu();
@@ -361,6 +364,280 @@ public class UserManager_GUI extends javax.swing.JFrame {
         TabbedPane.setMaximumSize(new java.awt.Dimension(800, 440));
         TabbedPane.setMinimumSize(new java.awt.Dimension(800, 440));
         TabbedPane.setPreferredSize(new java.awt.Dimension(900, 500));
+
+        AccountInfo.setBorder(javax.swing.BorderFactory.createTitledBorder("Your Infomation"));
+
+        HoTenLabel.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        HoTenLabel.setText("Họ Tên:");
+
+        EmailLabel.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        EmailLabel.setText("Email:");
+
+        AddrLabel.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        AddrLabel.setText("Địa chỉ:");
+
+        PhoneLabel.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        PhoneLabel.setText("SDT:");
+
+        DoBLabel.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        DoBLabel.setText("DoB");
+
+        LoginButton.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
+        LoginButton.setText("Login");
+        LoginButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                LoginButtonActionPerformed(evt);
+            }
+        });
+
+        ExportInfoButton.setText("Export account info");
+
+        UpdateAccButton.setText("Update account info");
+
+        NameField.setEditable(false);
+        NameField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                NameFieldActionPerformed(evt);
+            }
+        });
+
+        EmailTextField.setEditable(false);
+
+        PhoneTextField.setEditable(false);
+
+        AddrTextField.setEditable(false);
+
+        PasswordLabel.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        PasswordLabel.setText("Password:");
+
+        PasswordField.setEditable(false);
+        PasswordField.setText("jPasswordField1");
+
+        DoBTextField.setEditable(false);
+
+        CreateAccountButton.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
+        CreateAccountButton.setText("Create Account");
+        CreateAccountButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                CreateAccountButtonActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout AccountInfoLayout = new javax.swing.GroupLayout(AccountInfo);
+        AccountInfo.setLayout(AccountInfoLayout);
+        AccountInfoLayout.setHorizontalGroup(
+            AccountInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(AccountInfoLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(AccountInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(AccountInfoLayout.createSequentialGroup()
+                        .addGroup(AccountInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(EmailLabel)
+                            .addComponent(PasswordLabel)
+                            .addComponent(HoTenLabel)
+                            .addComponent(DoBLabel)
+                            .addComponent(PhoneLabel)
+                            .addComponent(AddrLabel))
+                        .addGap(31, 31, 31)
+                        .addGroup(AccountInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(PhoneTextField, javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(DoBTextField, javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(PasswordField, javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(EmailTextField, javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(NameField)
+                            .addComponent(AddrTextField))
+                        .addContainerGap())
+                    .addGroup(AccountInfoLayout.createSequentialGroup()
+                        .addComponent(UpdateAccButton)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(ExportInfoButton)
+                        .addGap(0, 28, Short.MAX_VALUE))
+                    .addGroup(AccountInfoLayout.createSequentialGroup()
+                        .addGap(10, 10, 10)
+                        .addGroup(AccountInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(AccountInfoLayout.createSequentialGroup()
+                                .addComponent(CreateAccountButton)
+                                .addGap(18, 18, 18)
+                                .addComponent(LoginButton, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(0, 0, Short.MAX_VALUE))
+                            .addComponent(jSeparator4)))))
+        );
+        AccountInfoLayout.setVerticalGroup(
+            AccountInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(AccountInfoLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(AccountInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(HoTenLabel)
+                    .addComponent(NameField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(8, 8, 8)
+                .addGroup(AccountInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(EmailLabel)
+                    .addComponent(EmailTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(AccountInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(PasswordLabel)
+                    .addComponent(PasswordField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(8, 8, 8)
+                .addGroup(AccountInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(DoBLabel)
+                    .addComponent(DoBTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(8, 8, 8)
+                .addGroup(AccountInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(PhoneLabel)
+                    .addComponent(PhoneTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(8, 8, 8)
+                .addGroup(AccountInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(AddrLabel)
+                    .addComponent(AddrTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jSeparator4, javax.swing.GroupLayout.PREFERRED_SIZE, 7, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(AccountInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(CreateAccountButton, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(LoginButton, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(AccountInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(UpdateAccButton)
+                    .addComponent(ExportInfoButton))
+                .addGap(28, 28, 28))
+        );
+
+        KeyPairInfo.setBorder(javax.swing.BorderFactory.createTitledBorder("Your Key Pair"));
+
+        jTextArea1.setEditable(false);
+        jTextArea1.setColumns(20);
+        jTextArea1.setRows(5);
+        jScrollPane3.setViewportView(jTextArea1);
+
+        jTextArea2.setEditable(false);
+        jTextArea2.setColumns(20);
+        jTextArea2.setRows(5);
+        jScrollPane4.setViewportView(jTextArea2);
+
+        jSeparator1.setPreferredSize(new java.awt.Dimension(169, 2));
+
+        jLabel7.setText("Your Public Key");
+
+        jLabel8.setText("Your Private Key");
+
+        KeySizeComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "768", "1024", "2048", "3072", "4096", "8192" }));
+        KeySizeComboBox1.setAutoscrolls(true);
+        KeySizeComboBox1.setDoubleBuffered(true);
+        KeySizeComboBox1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                KeySizeComboBox1ActionPerformed(evt);
+            }
+        });
+
+        CreateKeyPairButton1.setText("Create RSA Key Pair");
+        CreateKeyPairButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                CreateKeyPairButton1ActionPerformed(evt);
+            }
+        });
+
+        ExportPrivate1.setText("Export Key Pair & User Info");
+        ExportPrivate1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                ExportPrivate1ActionPerformed(evt);
+            }
+        });
+
+        jLabel11.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        jLabel11.setText("Keysize:");
+
+        javax.swing.GroupLayout KeyPairInfoLayout = new javax.swing.GroupLayout(KeyPairInfo);
+        KeyPairInfo.setLayout(KeyPairInfoLayout);
+        KeyPairInfoLayout.setHorizontalGroup(
+            KeyPairInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, KeyPairInfoLayout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 88, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(200, 200, 200))
+            .addGroup(KeyPairInfoLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(KeyPairInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(KeyPairInfoLayout.createSequentialGroup()
+                        .addGroup(KeyPairInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 426, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 428, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addContainerGap(60, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, KeyPairInfoLayout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(jLabel7)
+                        .addGap(211, 211, 211))
+                    .addGroup(KeyPairInfoLayout.createSequentialGroup()
+                        .addGroup(KeyPairInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 426, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(KeyPairInfoLayout.createSequentialGroup()
+                                .addGroup(KeyPairInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(CreateKeyPairButton1)
+                                    .addGroup(KeyPairInfoLayout.createSequentialGroup()
+                                        .addGap(10, 10, 10)
+                                        .addComponent(jLabel11, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                        .addComponent(KeySizeComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addGap(18, 18, 18)
+                                .addComponent(ExportPrivate1)))
+                        .addGap(0, 0, Short.MAX_VALUE))))
+        );
+        KeyPairInfoLayout.setVerticalGroup(
+            KeyPairInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, KeyPairInfoLayout.createSequentialGroup()
+                .addComponent(jLabel7)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 119, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel8)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 117, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(KeyPairInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(KeyPairInfoLayout.createSequentialGroup()
+                        .addComponent(CreateKeyPairButton1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(KeyPairInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel11)
+                            .addComponent(KeySizeComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addComponent(ExportPrivate1, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(15, 15, 15))
+        );
+
+        jLabel10.setText("Ghi lam nham gi do duoi day cho do don coi");
+
+        javax.swing.GroupLayout AccountPaneLayout = new javax.swing.GroupLayout(AccountPane);
+        AccountPane.setLayout(AccountPaneLayout);
+        AccountPaneLayout.setHorizontalGroup(
+            AccountPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(AccountPaneLayout.createSequentialGroup()
+                .addGroup(AccountPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(AccountPaneLayout.createSequentialGroup()
+                        .addGap(51, 51, 51)
+                        .addComponent(jLabel10)
+                        .addGap(18, 18, Short.MAX_VALUE))
+                    .addGroup(AccountPaneLayout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(AccountInfo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)))
+                .addComponent(KeyPairInfo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(37, 37, 37))
+        );
+        AccountPaneLayout.setVerticalGroup(
+            AccountPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(AccountPaneLayout.createSequentialGroup()
+                .addGap(35, 35, 35)
+                .addComponent(AccountInfo, javax.swing.GroupLayout.PREFERRED_SIZE, 294, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(34, 34, 34)
+                .addComponent(jLabel10)
+                .addContainerGap(93, Short.MAX_VALUE))
+            .addGroup(AccountPaneLayout.createSequentialGroup()
+                .addComponent(KeyPairInfo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, Short.MAX_VALUE))
+        );
+
+        TabbedPane.addTab("Your Account", AccountPane);
 
         ContactsPane.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
@@ -810,236 +1087,6 @@ public class UserManager_GUI extends javax.swing.JFrame {
 
         TabbedPane.addTab("Asymmetric Encryption", AsymmetricTab);
 
-        AccountInfo.setBorder(javax.swing.BorderFactory.createTitledBorder("Your Infomation"));
-
-        HoTenLabel.setText("Họ Tên:");
-
-        EmailLabel.setText("Email:");
-
-        AddrLabel.setText("Địa chỉ:");
-
-        PhoneLabel.setText("SDT:");
-
-        jLabel9.setText("DoB");
-
-        jButton1.setText("jButton1");
-
-        jButton2.setText("jButton2");
-
-        jButton3.setText("jButton3");
-
-        jButton4.setText("jButton4");
-
-        jTextField1.setText("jTextField1");
-
-        jTextField2.setText("jTextField2");
-
-        jTextField4.setText("jTextField4");
-
-        jTextField5.setText("jTextField5");
-
-        jLabel3.setText("Password:");
-
-        jPasswordField1.setText("jPasswordField1");
-
-        jFormattedTextField1.setText("jFormattedTextField1");
-
-        javax.swing.GroupLayout AccountInfoLayout = new javax.swing.GroupLayout(AccountInfo);
-        AccountInfo.setLayout(AccountInfoLayout);
-        AccountInfoLayout.setHorizontalGroup(
-            AccountInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(AccountInfoLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(AccountInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(AccountInfoLayout.createSequentialGroup()
-                        .addGroup(AccountInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(AccountInfoLayout.createSequentialGroup()
-                                .addComponent(jButton1)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jButton2))
-                            .addGroup(AccountInfoLayout.createSequentialGroup()
-                                .addComponent(jButton3)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jButton4)))
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addGroup(AccountInfoLayout.createSequentialGroup()
-                        .addGroup(AccountInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(EmailLabel)
-                            .addComponent(jLabel3)
-                            .addComponent(HoTenLabel)
-                            .addComponent(jLabel9)
-                            .addComponent(PhoneLabel)
-                            .addComponent(AddrLabel))
-                        .addGap(31, 31, 31)
-                        .addGroup(AccountInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jTextField5)
-                            .addComponent(jTextField4)
-                            .addComponent(jTextField1)
-                            .addComponent(jPasswordField1, javax.swing.GroupLayout.DEFAULT_SIZE, 169, Short.MAX_VALUE)
-                            .addComponent(jTextField2)
-                            .addComponent(jFormattedTextField1))))
-                .addContainerGap())
-        );
-        AccountInfoLayout.setVerticalGroup(
-            AccountInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(AccountInfoLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(AccountInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(HoTenLabel)
-                    .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(AccountInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(EmailLabel)
-                    .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 7, Short.MAX_VALUE)
-                .addGroup(AccountInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel3)
-                    .addComponent(jPasswordField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(AccountInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel9)
-                    .addComponent(jFormattedTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(6, 6, 6)
-                .addGroup(AccountInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(PhoneLabel)
-                    .addComponent(jTextField4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(AccountInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(AddrLabel)
-                    .addComponent(jTextField5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(27, 27, 27)
-                .addGroup(AccountInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButton1)
-                    .addComponent(jButton2))
-                .addGap(18, 18, 18)
-                .addGroup(AccountInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButton3)
-                    .addComponent(jButton4))
-                .addGap(27, 27, 27))
-        );
-
-        KeyPairInfo.setBorder(javax.swing.BorderFactory.createTitledBorder("Your Key Pair"));
-
-        jButton6.setText("jButton6");
-
-        jButton8.setText("jButton8");
-
-        jTextArea1.setColumns(20);
-        jTextArea1.setRows(5);
-        jScrollPane3.setViewportView(jTextArea1);
-
-        jTextArea2.setColumns(20);
-        jTextArea2.setRows(5);
-        jScrollPane4.setViewportView(jTextArea2);
-
-        jSeparator1.setPreferredSize(new java.awt.Dimension(169, 2));
-
-        jLabel7.setText("Your Public Key");
-
-        jLabel8.setText("Your Private Key");
-
-        KeySizeComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "768", "1024", "2048", "3072", "4096", "8192" }));
-        KeySizeComboBox1.setAutoscrolls(true);
-        KeySizeComboBox1.setDoubleBuffered(true);
-        KeySizeComboBox1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                KeySizeComboBox1ActionPerformed(evt);
-            }
-        });
-
-        CreateKeyPairButton1.setText("Create RSA Key Pair");
-        CreateKeyPairButton1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                CreateKeyPairButton1ActionPerformed(evt);
-            }
-        });
-
-        ExportPrivate1.setText("Export Private Key");
-        ExportPrivate1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                ExportPrivate1ActionPerformed(evt);
-            }
-        });
-
-        javax.swing.GroupLayout KeyPairInfoLayout = new javax.swing.GroupLayout(KeyPairInfo);
-        KeyPairInfo.setLayout(KeyPairInfoLayout);
-        KeyPairInfoLayout.setHorizontalGroup(
-            KeyPairInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, KeyPairInfoLayout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jLabel7)
-                .addGap(192, 192, 192))
-            .addGroup(KeyPairInfoLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(KeyPairInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(KeyPairInfoLayout.createSequentialGroup()
-                        .addComponent(CreateKeyPairButton1)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(KeySizeComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(ExportPrivate1, javax.swing.GroupLayout.PREFERRED_SIZE, 129, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 151, Short.MAX_VALUE))
-                    .addGroup(KeyPairInfoLayout.createSequentialGroup()
-                        .addGroup(KeyPairInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jSeparator1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jScrollPane4)
-                            .addComponent(jScrollPane3)
-                            .addGroup(KeyPairInfoLayout.createSequentialGroup()
-                                .addComponent(jButton6)
-                                .addGap(18, 18, 18)
-                                .addComponent(jButton8))
-                            .addGroup(KeyPairInfoLayout.createSequentialGroup()
-                                .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 88, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(0, 0, Short.MAX_VALUE)))
-                        .addContainerGap())))
-        );
-        KeyPairInfoLayout.setVerticalGroup(
-            KeyPairInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, KeyPairInfoLayout.createSequentialGroup()
-                .addComponent(jLabel7)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 143, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 107, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel8)
-                .addGap(37, 37, 37)
-                .addGroup(KeyPairInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(CreateKeyPairButton1)
-                    .addComponent(KeySizeComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(ExportPrivate1))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(KeyPairInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButton6)
-                    .addComponent(jButton8))
-                .addContainerGap())
-        );
-
-        javax.swing.GroupLayout AccountPaneLayout = new javax.swing.GroupLayout(AccountPane);
-        AccountPane.setLayout(AccountPaneLayout);
-        AccountPaneLayout.setHorizontalGroup(
-            AccountPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(AccountPaneLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(AccountInfo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(KeyPairInfo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(67, Short.MAX_VALUE))
-        );
-        AccountPaneLayout.setVerticalGroup(
-            AccountPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(AccountPaneLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(AccountPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(AccountInfo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(KeyPairInfo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-
-        TabbedPane.addTab("Your Account", AccountPane);
-
         Help.setText("Help");
         MenuBar.add(Help);
 
@@ -1478,6 +1525,10 @@ public class UserManager_GUI extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_EncryptWithPublicKeyActionPerformed
 
+    private void ExportPrivate1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ExportPrivate1ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_ExportPrivate1ActionPerformed
+
     private void CreateKeyPairButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_CreateKeyPairButton1ActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_CreateKeyPairButton1ActionPerformed
@@ -1486,9 +1537,20 @@ public class UserManager_GUI extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_KeySizeComboBox1ActionPerformed
 
-    private void ExportPrivate1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ExportPrivate1ActionPerformed
+    private void NameFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NameFieldActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_ExportPrivate1ActionPerformed
+    }//GEN-LAST:event_NameFieldActionPerformed
+
+    private void LoginButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_LoginButtonActionPerformed
+        // TODO add your handling code here:
+        
+    }//GEN-LAST:event_LoginButtonActionPerformed
+
+    private void CreateAccountButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_CreateAccountButtonActionPerformed
+        // TODO add your handling code here:
+        //Users.GUI.CreateAccount_GUI createAccountWindow = new Users.GUI.CreateAccount_GUI();
+        //createAccountWindow.
+    }//GEN-LAST:event_CreateAccountButtonActionPerformed
 
     /**
      * @param args the command line arguments
@@ -1605,22 +1667,28 @@ public class UserManager_GUI extends javax.swing.JFrame {
     private javax.swing.JPanel AccountPane;
     private javax.swing.JButton AddUserButton;
     private javax.swing.JLabel AddrLabel;
+    private javax.swing.JTextField AddrTextField;
     private javax.swing.JPanel AsymmetricTab;
     private javax.swing.JTextArea CommandLine;
     private javax.swing.JTextArea CommandLine_Sym;
     private javax.swing.JPanel ContactsPane;
+    private javax.swing.JButton CreateAccountButton;
     private javax.swing.JButton CreateKeyPairButton;
     private javax.swing.JButton CreateKeyPairButton1;
     private javax.swing.JButton DecryptButton;
     private javax.swing.JMenuItem DeleteContact;
     private javax.swing.JButton DeleteUserButton;
+    private javax.swing.JLabel DoBLabel;
+    private javax.swing.JFormattedTextField DoBTextField;
     private javax.swing.JMenuItem EditContact;
     private javax.swing.JButton EditUserButton;
     private javax.swing.JLabel EmailLabel;
+    private javax.swing.JTextField EmailTextField;
     private javax.swing.JButton EncryptButton;
     private javax.swing.JPanel EncryptTab;
     private javax.swing.JMenuItem EncryptWithPublicKey;
     private javax.swing.JMenuItem ExportContactInfo;
+    private javax.swing.JButton ExportInfoButton;
     private javax.swing.JButton ExportPrivate;
     private javax.swing.JButton ExportPrivate1;
     private javax.swing.JButton ExportPublic;
@@ -1643,35 +1711,33 @@ public class UserManager_GUI extends javax.swing.JFrame {
     private javax.swing.JTextField KeySizeBox_Sym;
     private javax.swing.JComboBox<String> KeySizeComboBox;
     private javax.swing.JComboBox<String> KeySizeComboBox1;
+    private javax.swing.JButton LoginButton;
     private javax.swing.JMenuBar MenuBar;
+    private javax.swing.JTextField NameField;
     private javax.swing.JTextField OutputFileField;
     private javax.swing.JTextField OutputFileField_Sym;
+    private javax.swing.JPasswordField PasswordField;
+    private javax.swing.JLabel PasswordLabel;
     private javax.swing.JLabel PhoneLabel;
+    private javax.swing.JTextField PhoneTextField;
     private javax.swing.JButton RefreshButton;
     private javax.swing.JScrollPane ScrollUserPane;
     private javax.swing.JButton SignButton;
     private javax.swing.JTabbedPane TabbedPane;
+    private javax.swing.JButton UpdateAccButton;
     private javax.swing.JPanel UserOperationPane;
     private javax.swing.JTable UserTable;
     private javax.swing.JButton VerifyButton;
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
-    private javax.swing.JButton jButton3;
-    private javax.swing.JButton jButton4;
-    private javax.swing.JButton jButton6;
-    private javax.swing.JButton jButton8;
     private javax.swing.JButton jButton9;
-    private javax.swing.JFormattedTextField jFormattedTextField1;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel10;
+    private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
-    private javax.swing.JLabel jLabel9;
-    private javax.swing.JPasswordField jPasswordField1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
@@ -1679,12 +1745,9 @@ public class UserManager_GUI extends javax.swing.JFrame {
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JPopupMenu.Separator jSeparator2;
     private javax.swing.JPopupMenu.Separator jSeparator3;
+    private javax.swing.JSeparator jSeparator4;
     private javax.swing.JTextArea jTextArea1;
     private javax.swing.JTextArea jTextArea2;
-    private javax.swing.JTextField jTextField1;
-    private javax.swing.JTextField jTextField2;
-    private javax.swing.JTextField jTextField4;
-    private javax.swing.JTextField jTextField5;
     private javax.swing.JPopupMenu popUpMenu;
     // End of variables declaration//GEN-END:variables
 }
