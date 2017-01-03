@@ -1,4 +1,4 @@
-package mhtt_bt3;
+package DCrypto;
 // Thư viện xử lý việc bảo mật
 // Bao gồm những chức năng chính sau:
 // Mã hóa đối xứng, bất đối xứng, hàm băm, chữ ký điện tử
@@ -45,6 +45,7 @@ public class DCrypto
     {
         try 
         {
+            //mode = AES hoac blowfish
             KeyGenerator keyGen = KeyGenerator.getInstance(mode);
             keyGen.init(keySize);
             Key key = keyGen.generateKey();
@@ -315,6 +316,167 @@ public class DCrypto
         return false;
     }
     
+    //Ma hoa bang session key, sau do ma hoa session key bang public key va nhet vo file
+    public static boolean symEncryptFileAdvanced(PublicKey publicKey, String algo, String sessionKeySize, String mode, String padMode, String plainFile, String cipherFile)
+    {
+        FileInputStream iFile = null; 
+        FileOutputStream oFile = null;
+        int blockSize;
+        try 
+        {
+            //inputForm = "AES/CBC/PKCS5PADDING";
+            String inputForm = algo + '/' + mode + '/' + padMode;
+            algo = algo.toUpperCase();
+            inputForm = inputForm.toUpperCase();
+            System.out.println("Input form: " + inputForm);
+            
+            //Tao session key
+            Key sessionKey = generateSecretKey(algo,Integer.parseInt(sessionKeySize));
+            System.out.println("\nSession key: " + keyToString(sessionKey));
+            
+            int ivSize = 0;
+            if(algo.equals("AES"))
+                ivSize = 16;
+            else if(algo.equals("BLOWFISH"))
+                ivSize = 8;
+            
+            IvParameterSpec iv = new IvParameterSpec(generateRandomIV(ivSize));
+            byte [] keyBytes = sessionKey.getEncoded();
+            SecretKeySpec keySpec = new SecretKeySpec(keyBytes,algo.toUpperCase());
+            Cipher cipher = Cipher.getInstance(inputForm);
+            cipher.init(Cipher.ENCRYPT_MODE,keySpec,iv);
+
+            //Doc va encrypt file
+            iFile = new FileInputStream(plainFile);
+            oFile = new FileOutputStream(cipherFile);
+            
+            String encryptedSesionKey = encryptRSAMessage(publicKey, keyToString(sessionKey));
+            //encryptRSAMessage           
+            
+            //Ghi session key da dc ma hoa, thuat toan ma hoa, mode ma hoa, padding mode va iv
+            oFile.write(encryptedSesionKey.getBytes("UTF-8"));
+            oFile.write("\n".getBytes("UTF-8"));
+            oFile.write(inputForm.getBytes("UTF-8"));
+            oFile.write("|".getBytes("UTF-8"));
+            oFile.write(Base64.getEncoder().encode(iv.getIV()));
+            oFile.write("\n".getBytes("UTF-8"));
+            oFile.flush();
+            
+            blockSize = 64;
+            byte[] blockByte = new byte[blockSize];
+            int readBytes=0;
+            while ( (readBytes = iFile.read(blockByte)) != -1 )
+            {
+                byte[] encrypted = cipher.update(blockByte, 0, readBytes);
+                if(encrypted != null)
+                    oFile.write(encrypted);
+            }
+            
+            byte[] encrypted = cipher.doFinal();
+            if(encrypted != null)
+                oFile.write(encrypted);
+            iFile.close();
+            oFile.flush();
+            oFile.close();
+            
+            System.out.println("Encryption completed!");
+            return true;
+        } 
+        catch (NoSuchPaddingException | InvalidKeyException | UnsupportedEncodingException | InvalidAlgorithmParameterException ex) {
+            Logger.getLogger(DCrypto.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(DCrypto.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException | NoSuchAlgorithmException ex) {
+            Logger.getLogger(DCrypto.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IllegalBlockSizeException | BadPaddingException ex) {
+            Logger.getLogger(DCrypto.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return false;
+    }
+
+    //Giai ma session key bang private key, sau do giai ma file bang session key
+    public static boolean symDecryptFileAdvanced(PrivateKey privateKey, String cipherFile, String plainFile) throws IOException
+    {
+        //boolean result = false
+        FileInputStream iFile = null;
+        FileOutputStream oFile = null;
+        BufferedReader buffReader = null;
+        int blockSize;
+        try 
+        {
+            iFile = new FileInputStream(cipherFile);
+            oFile = new FileOutputStream(plainFile);
+            buffReader = new BufferedReader(new InputStreamReader(iFile));
+            
+            //Lan luot doc sessionkey, thuat toan, mode cua thuat toan, padding mode va IV
+            String[] arg = new String[2];
+            String encryptedSessionKey = buffReader.readLine();
+            String tempLine = buffReader.readLine();
+            buffReader.close();
+            
+            //Get tham so len
+            arg = tempLine.split("[|]");
+            String inputForm = arg[0].toUpperCase();
+            String ivString = arg[1];
+            //temp[0] = algo, temp[1] = mode, temp[2] = padMode
+            String temp[] = arg[0].split("[/]");
+            
+            System.out.println("Input form: " + inputForm);
+            System.out.println("IV: " + ivString);
+            System.out.println("Algorithm: " + temp[0]);
+            
+            IvParameterSpec iv = new IvParameterSpec(Base64.getDecoder().decode(ivString));
+            
+            //Giai ma session key bang private key
+            String sessionKey = decryptRSAMessage(privateKey,encryptedSessionKey);
+            Key testKey = stringToKey(sessionKey,temp[0].toUpperCase());
+            //testKey.
+            //byte[] keyBytes = sessionKey.getBytes("UTF-8");
+            byte[] keyBytes = testKey.getEncoded();
+            SecretKeySpec keySpec = new SecretKeySpec(keyBytes,temp[0].toUpperCase());
+            Cipher cipher = Cipher.getInstance(inputForm);
+            cipher.init(Cipher.DECRYPT_MODE,keySpec,iv);
+            
+            //Cong 3 vi co 2 ky tu '|' va 1 ky tu \n
+            //int argLen = arg[0].length() + arg[1].length() + 2;
+            int argLen = encryptedSessionKey.length() + arg[0].length() + arg[1].length() + 3;
+            System.out.println("Check argLen: " + argLen);
+            iFile = new FileInputStream(cipherFile);
+            iFile.skip(argLen);
+
+            int readBytes = 0;
+            blockSize = 64;
+            byte[] buffer = new byte[blockSize];
+            while ( (readBytes = iFile.read(buffer)) != -1)
+            {
+                byte[] decrypted = cipher.update(buffer, 0, readBytes);
+                if(decrypted != null)
+                    oFile.write(decrypted);
+            }
+            
+            byte[] decrypted = cipher.doFinal();
+            if(decrypted != null)
+                oFile.write(decrypted);
+            iFile.close();
+            oFile.flush();
+            oFile.close();
+            
+            System.out.println("Decryption completed!");
+            return true;
+        } 
+        catch (FileNotFoundException ex) {
+            Logger.getLogger(DCrypto.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException | NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException ex) {
+            Logger.getLogger(DCrypto.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IllegalBlockSizeException | BadPaddingException ex) {
+            Logger.getLogger(DCrypto.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        iFile.close();
+        oFile.flush();
+        oFile.close();
+        return false;
+    }
+    
     public static boolean RSAEncryptFile(PublicKey pubKey, String plainFile,String cipherFile) throws IOException
     {
         FileInputStream iFile = null; 
@@ -427,11 +589,13 @@ public class DCrypto
         return false;
     }
 
-    public static String encrypRSAMessage(PublicKey key, String message)
+    public static String encryptRSAMessage(PublicKey key, String message)
     {
         try 
         {
-            Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+            //String inputForm = "RSA/ECB/OAEPWithSHA-256AndMGF1Padding";
+            //Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+            Cipher cipher = Cipher.getInstance("RSA/ECB/OAEPWithSHA-256AndMGF1Padding");
             cipher.init(Cipher.ENCRYPT_MODE, key);
 
             byte[] cipherBytes = cipher.doFinal(message.getBytes());
@@ -453,7 +617,8 @@ public class DCrypto
     {
         try 
         {
-                Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1PADDING");
+                //Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+                Cipher cipher = Cipher.getInstance("RSA/ECB/OAEPWithSHA-256AndMGF1Padding");
                 cipher.init(Cipher.DECRYPT_MODE, key);
 
                 byte[] plainBytes = cipher.doFinal(Base64.getDecoder().decode(cipherText));
@@ -474,24 +639,24 @@ public class DCrypto
     // Generate 2048-bit RSA Key Pair
     public static KeyPair createRSAKeyPair(int keySize)
     {	
-            try 
-            {
-                    System.out.println("Generating RSA Key pair....");
-                    KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
-                    //  2048 bits
-                    keyGen.initialize(keySize);
-                    KeyPair keyPair = keyGen.generateKeyPair();
-                    System.out.println("RSA key pair has been completed! ^^");
-                    System.out.println("Private Key: " + keyToString(keyPair.getPrivate()));
-                    System.out.println("Public Key: " + keyToString(keyPair.getPublic()));
-                    return keyPair;
-            } 
-            catch (NoSuchAlgorithmException e) 
-            {
-                System.out.println("There is no such algorithm exception");
-            }
-            System.out.println("Failed in generating RSA Key Pair...!");
-            return null;
+        try 
+        {
+            System.out.println("Generating RSA Key pair....");
+            KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
+            //  2048 bits
+            keyGen.initialize(keySize);
+            KeyPair keyPair = keyGen.generateKeyPair();
+            System.out.println("RSA key pair has been completed! ^^");
+            System.out.println("Private Key: " + keyToString(keyPair.getPrivate()));
+            System.out.println("Public Key: " + keyToString(keyPair.getPublic()));
+            return keyPair;
+        } 
+        catch (NoSuchAlgorithmException e) 
+        {
+            System.out.println("There is no such algorithm exception");
+        }
+        System.out.println("Failed in generating RSA Key Pair...!");
+        return null;
     }
 
     // ghi xuong file Pem
@@ -583,10 +748,8 @@ public class DCrypto
 
             writer.close();
         } 
-
         catch (IOException e) 
         {
-
         }
     }
 
@@ -594,26 +757,26 @@ public class DCrypto
     {
         try 
         {
-               File file = new File(filename);
-               FileReader reader = new FileReader(file);
-               BufferedReader bufReader = new BufferedReader(reader);
+            File file = new File(filename);
+            FileReader reader = new FileReader(file);
+            BufferedReader bufReader = new BufferedReader(reader);
 
-               bufReader.readLine();
-               String strKey = bufReader.readLine();
-               PublicKey pubKey = stringToPubKey(strKey);
+            bufReader.readLine();
+            String strKey = bufReader.readLine();
+            PublicKey pubKey = stringToPubKey(strKey);
 
-               bufReader.close();
-               return pubKey;
+            bufReader.close();
+            return pubKey;
         } 
         catch (IOException e) 
         {
-               // TODO Auto-generated catch block
-               e.printStackTrace();
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
        return null;
     }
 
-        public static void exportPrivateKey(PrivateKey prvKey, String filename)
+    public static void exportPrivateKey(PrivateKey prvKey, String filename)
     {
         try 
         {
@@ -633,10 +796,8 @@ public class DCrypto
             writer.println(temp);
             writer.close();
         } 
-
         catch (IOException e) 
         {
-
         }
     }
 
@@ -644,20 +805,19 @@ public class DCrypto
     {
         try 
         {
-               File file = new File(filename);
-               FileReader reader = new FileReader(file);
-               BufferedReader bufReader = new BufferedReader(reader);
+            File file = new File(filename);
+            FileReader reader = new FileReader(file);
+            BufferedReader bufReader = new BufferedReader(reader);
 
-               bufReader.readLine();
-               String strKey = bufReader.readLine();
-               PrivateKey prvKey = stringToPrivateKey(strKey);
+            bufReader.readLine();
+            String strKey = bufReader.readLine();
+            PrivateKey prvKey = stringToPrivateKey(strKey);
 
-               bufReader.close();
-               return prvKey;
+            bufReader.close();
+            return prvKey;
         } 
         catch (IOException e) 
         {
-            
         }
        return null;
     }
@@ -685,10 +845,8 @@ public class DCrypto
 
             writer.close();
             //return null;
-
         } catch (IOException e) {
-                // TODO Auto-generated catch block
-            e.printStackTrace();
+            // TODO Auto-generated catch block
         }
     }
 
@@ -696,44 +854,44 @@ public class DCrypto
     {
         try 
         {
-               File file = new File(filename + ".symkey");
-               FileReader reader = new FileReader(file);
-               BufferedReader bufReader = new BufferedReader(reader);
+            File file = new File(filename + ".symkey");
+            FileReader reader = new FileReader(file);
+            BufferedReader bufReader = new BufferedReader(reader);
 
-               bufReader.readLine();
-               String strKey = bufReader.readLine();
-               Key key = stringToKey(strKey,"AES");
+            bufReader.readLine();
+            String strKey = bufReader.readLine();
+            Key key = stringToKey(strKey,"AES");
 
-               bufReader.close();
-               return key;
+            bufReader.close();
+            return key;
         } 
         catch (IOException e) 
         {
-               // TODO Auto-generated catch block
+            // TODO Auto-generated catch block
         }
        return null;
     }
 
     public static String keyToString(Key key)
     {
-            byte[] keyBytes = key.getEncoded();
-            return new String(Base64.getEncoder().encode(keyBytes));
+        byte[] keyBytes = key.getEncoded();
+        return new String(Base64.getEncoder().encode(keyBytes));
     }
 
     public static Key stringToKey(String string, String mode)
     {
-            Key key = null;
-            byte[] keyBytes;
-            try 
-            {
-                    keyBytes = Base64.getDecoder().decode(string.getBytes("UTF-8"));
-                    SecretKeySpec keySpec = new SecretKeySpec(keyBytes,mode);
-                    key = keySpec;
-            } catch (UnsupportedEncodingException e) 
-            {
-                    // TODO Auto-generated catch block
-            }
-            return key;
+        Key key = null;
+        byte[] keyBytes;
+        try 
+        {
+                keyBytes = Base64.getDecoder().decode(string.getBytes("UTF-8"));
+                SecretKeySpec keySpec = new SecretKeySpec(keyBytes,mode);
+                key = keySpec;
+        } catch (UnsupportedEncodingException e) 
+        {
+                // TODO Auto-generated catch block
+        }
+        return key;
     }
 
     public static PublicKey stringToPubKey(String strKey)
@@ -742,14 +900,15 @@ public class DCrypto
         X509EncodedKeySpec keySpec = new X509EncodedKeySpec(publicBytes);
         KeyFactory keyFactory;
 
-        try {
-                keyFactory = KeyFactory.getInstance("RSA");
-                PublicKey pubKey = keyFactory.generatePublic(keySpec);
-                return pubKey;
+        try 
+        {
+            keyFactory = KeyFactory.getInstance("RSA");
+            PublicKey pubKey = keyFactory.generatePublic(keySpec);
+            return pubKey;
         } 
         catch (NoSuchAlgorithmException | InvalidKeySpecException e) 
         {
-                // TODO Auto-generated catch block
+            // TODO Auto-generated catch block
         }
         return null;
     }
@@ -807,13 +966,13 @@ public class DCrypto
 
             if(result == true)
             {
-                    System.out.println("Signatured verified! ^^");
-                    return true;
+                System.out.println("Signatured verified! ^^");
+                return true;
             }
             else
             {
-                    System.out.println( "Signature isn't verified.... :'(" );
-                    return false;
+                System.out.println( "Signature isn't verified.... :'(" );
+                return false;
             }
         } 
         catch (UnsupportedEncodingException | NoSuchAlgorithmException | InvalidKeyException | SignatureException ex) {
@@ -821,34 +980,6 @@ public class DCrypto
         }
         return false;
     }
-
-//    public static boolean verifySign(PublicKey key, String originMess, String signature)
-//    {
-//        try 
-//        {
-//            byte[] originBytes = originMess.getBytes("UTF-8");
-//            byte[] signBytes = Base64.getDecoder().decode(signature.getBytes("UTF-8"));
-//            Signature sign = Signature.getInstance("SHA512withRSA");
-//            sign.initVerify(key);
-//            sign.update(originBytes);
-//            boolean result =  sign.verify(signBytes);
-//
-//            if(result == true)
-//            {
-//                    System.out.println("Signatured verified! ^^");
-//                    return true;
-//            }
-//            else
-//            {
-//                    System.out.println( "Signature failed.... :'(" );
-//                    return false;
-//            }
-//        } 
-//        catch (UnsupportedEncodingException | NoSuchAlgorithmException | InvalidKeyException | SignatureException ex) {
-//            Logger.getLogger(DCrypto.class.getName()).log(Level.SEVERE, null, ex);
-//        }
-//        return true;
-//    }
 }
 
 
