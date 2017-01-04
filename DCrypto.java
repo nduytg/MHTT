@@ -341,10 +341,10 @@ public class DCrypto
                 ivSize = 8;
             
             IvParameterSpec iv = new IvParameterSpec(generateRandomIV(ivSize));
-            //byte [] keyBytes = sessionKey.getBytes("UTF-8");
-            //SecretKeySpec keySpec = new SecretKeySpec(keyBytes,algo.toUpperCase());
+            byte [] keyBytes = sessionKey.getEncoded();
+            SecretKeySpec keySpec = new SecretKeySpec(keyBytes,algo.toUpperCase());
             Cipher cipher = Cipher.getInstance(inputForm);
-            cipher.init(Cipher.ENCRYPT_MODE,sessionKey,iv);
+            cipher.init(Cipher.ENCRYPT_MODE,keySpec,iv);
 
             //Doc va encrypt file
             iFile = new FileInputStream(plainFile);
@@ -429,14 +429,17 @@ public class DCrypto
             
             //Giai ma session key bang private key
             String sessionKey = decryptRSAMessage(privateKey,encryptedSessionKey);
-            byte[] keyBytes = sessionKey.getBytes("UTF-8");
+            Key testKey = stringToKey(sessionKey,temp[0].toUpperCase());
+            //testKey.
+            //byte[] keyBytes = sessionKey.getBytes("UTF-8");
+            byte[] keyBytes = testKey.getEncoded();
             SecretKeySpec keySpec = new SecretKeySpec(keyBytes,temp[0].toUpperCase());
             Cipher cipher = Cipher.getInstance(inputForm);
             cipher.init(Cipher.DECRYPT_MODE,keySpec,iv);
             
-            //Cong 2 vi co e ky tu '|'
+            //Cong 3 vi co 2 ky tu '|' va 1 ky tu \n
             //int argLen = arg[0].length() + arg[1].length() + 2;
-            int argLen = sessionKey.length() + arg[0].length() + arg[1].length() + 2;
+            int argLen = encryptedSessionKey.length() + arg[0].length() + arg[1].length() + 3;
             System.out.println("Check argLen: " + argLen);
             iFile = new FileInputStream(cipherFile);
             iFile.skip(argLen);
