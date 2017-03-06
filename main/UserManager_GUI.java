@@ -7,9 +7,9 @@ package main;
 
 import DCrypto.*;
 import Users.*;
-import Users.GUI.CreateAccount_GUI;
-import Users.GUI.Delete_GUI;
-import Users.GUI.ModifyAccount_GUI;
+import Users.GUI.AddContact_GUI;
+import Users.GUI.ModifyUser_GUI;
+import Users.GUI.Passphrase_GUI;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -19,21 +19,26 @@ import java.io.PrintWriter;
 import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.text.SimpleDateFormat;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
@@ -48,9 +53,15 @@ public class UserManager_GUI extends javax.swing.JFrame {
      */
     PrivateKey mainPrivateKey = null;
     PublicKey mainPublicKey = null;
-    public UserManager_GUI() throws IOException, ParserConfigurationException, SAXException {
+    KeyPair mainKeyPair = null;
+    String tempPubKey = null;
+    String tempEmail = null;
+    
+    public UserManager_GUI(String temp) throws IOException, ParserConfigurationException, SAXException {
         initComponents();
-        GetData();
+        this.pathdir = temp;
+        this.GetData(this.pathdir);
+        this.SetInf(this.pathdir);
     }
 
     /**
@@ -65,15 +76,18 @@ public class UserManager_GUI extends javax.swing.JFrame {
         EditUserButton = new javax.swing.JButton();
         DeleteUserButton = new javax.swing.JButton();
         popUpMenu = new javax.swing.JPopupMenu();
-        EncryptWithPublicKey = new javax.swing.JMenuItem();
         jSeparator3 = new javax.swing.JPopupMenu.Separator();
         EditContact = new javax.swing.JMenuItem();
         DeleteContact = new javax.swing.JMenuItem();
         jSeparator2 = new javax.swing.JPopupMenu.Separator();
         ExportContactInfo = new javax.swing.JMenuItem();
         jSeparator5 = new javax.swing.JPopupMenu.Separator();
-        ShowContactInfo = new javax.swing.JMenuItem();
-        PopUpTabbedPane = new javax.swing.JTabbedPane();
+        ContactsPane = new javax.swing.JPanel();
+        ScrollUserPane = new javax.swing.JScrollPane();
+        UserTable = new javax.swing.JTable();
+        UserOperationPane = new javax.swing.JPanel();
+        AddContactButton = new javax.swing.JButton();
+        RefreshButton = new javax.swing.JButton();
         TabbedPane = new javax.swing.JTabbedPane();
         AccountPane = new javax.swing.JPanel();
         AccountInfo = new javax.swing.JPanel();
@@ -82,7 +96,6 @@ public class UserManager_GUI extends javax.swing.JFrame {
         AddrLabel = new javax.swing.JLabel();
         PhoneLabel = new javax.swing.JLabel();
         DoBLabel = new javax.swing.JLabel();
-        LoginButton = new javax.swing.JButton();
         ExportInfoButton = new javax.swing.JButton();
         UpdateAccButton = new javax.swing.JButton();
         NameField = new javax.swing.JTextField();
@@ -92,62 +105,28 @@ public class UserManager_GUI extends javax.swing.JFrame {
         PasswordLabel = new javax.swing.JLabel();
         PasswordField = new javax.swing.JPasswordField();
         DoBTextField = new javax.swing.JFormattedTextField();
-        CreateAccountButton = new javax.swing.JButton();
         jSeparator4 = new javax.swing.JSeparator();
+        jButton3 = new javax.swing.JButton();
         KeyPairInfo = new javax.swing.JPanel();
         PublicKeyScrollPane = new javax.swing.JScrollPane();
         PublicKeyArea = new javax.swing.JTextArea();
         PrivateKeyScrollPane = new javax.swing.JScrollPane();
         PrivateKeyArea = new javax.swing.JTextArea();
-        jSeparator1 = new javax.swing.JSeparator();
-        jLabel7 = new javax.swing.JLabel();
-        jLabel8 = new javax.swing.JLabel();
         KeySizeComboBox1 = new javax.swing.JComboBox<>();
         CreateKeyPairButton1 = new javax.swing.JButton();
-        ExportPrivate1 = new javax.swing.JButton();
+        SaveKeyPairToAccount = new javax.swing.JButton();
         jLabel11 = new javax.swing.JLabel();
-        jLabel10 = new javax.swing.JLabel();
-        ContactsPane = new javax.swing.JPanel();
-        ScrollUserPane = new javax.swing.JScrollPane();
-        UserTable = new javax.swing.JTable();
-        UserOperationPane = new javax.swing.JPanel();
-        AddUserButton = new javax.swing.JButton();
-        GetPublicKeyButton = new javax.swing.JButton();
-        jButton9 = new javax.swing.JButton();
-        RefreshButton = new javax.swing.JButton();
-        AsymmetricTab = new javax.swing.JPanel();
-        OutputFileField = new javax.swing.JTextField();
-        VerifyButton = new javax.swing.JButton();
-        ExportPublic = new javax.swing.JButton();
-        EncryptButton = new javax.swing.JButton();
-        DecryptButton = new javax.swing.JButton();
-        jLabel2 = new javax.swing.JLabel();
-        jLabel4 = new javax.swing.JLabel();
-        KeySizeBox = new javax.swing.JTextField();
-        ExportPrivate = new javax.swing.JButton();
-        jLabel1 = new javax.swing.JLabel();
-        ImportPublicKey = new javax.swing.JButton();
-        InputFileField = new javax.swing.JTextField();
-        ImportPrivateKey = new javax.swing.JButton();
-        FileButton_1 = new javax.swing.JButton();
-        CreateKeyPairButton = new javax.swing.JButton();
-        FileButton_2 = new javax.swing.JButton();
-        SignButton = new javax.swing.JButton();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        CommandLine = new javax.swing.JTextArea();
+        jSeparator1 = new javax.swing.JSeparator();
         EncryptTab = new javax.swing.JPanel();
         KeyInfoPane = new javax.swing.JPanel();
         jScrollPane2 = new javax.swing.JScrollPane();
         PublicKeyTextArea = new javax.swing.JTextArea();
-        KeySizeBox_Sym = new javax.swing.JTextField();
         jLabel3 = new javax.swing.JLabel();
         jLabel9 = new javax.swing.JLabel();
         jLabel12 = new javax.swing.JLabel();
         AlgorithmField = new javax.swing.JTextField();
         KeyOwnerField = new javax.swing.JTextField();
         KeySizeField = new javax.swing.JTextField();
-        ExportPublicKey = new javax.swing.JButton();
-        ImportPublicKey1 = new javax.swing.JButton();
         FileInfoPane = new javax.swing.JPanel();
         OutputFileField_Sym = new javax.swing.JTextField();
         InputFileField_Sym = new javax.swing.JTextField();
@@ -158,26 +137,23 @@ public class UserManager_GUI extends javax.swing.JFrame {
         SessionKeyInfoPane = new javax.swing.JPanel();
         SymAlgoComboBox = new javax.swing.JComboBox<>();
         jLabel13 = new javax.swing.JLabel();
-        jLabel14 = new javax.swing.JLabel();
         jLabel15 = new javax.swing.JLabel();
-        SessionKeyComboBox = new javax.swing.JComboBox<>();
         PadSchemeComboBox = new javax.swing.JComboBox<>();
         jLabel16 = new javax.swing.JLabel();
         ModOpComboBox = new javax.swing.JComboBox<>();
-        jButton1 = new javax.swing.JButton();
+        EncryptButton = new javax.swing.JButton();
+        VerifyButton = new javax.swing.JButton();
         DecryptTab = new javax.swing.JPanel();
         KeyInfoPane1 = new javax.swing.JPanel();
         jScrollPane3 = new javax.swing.JScrollPane();
         CommandLine_Sym1 = new javax.swing.JTextArea();
-        KeySizeBox_Sym1 = new javax.swing.JTextField();
         jLabel17 = new javax.swing.JLabel();
         jLabel18 = new javax.swing.JLabel();
         jLabel19 = new javax.swing.JLabel();
         AlgorithmField1 = new javax.swing.JTextField();
         KeyOwnerField1 = new javax.swing.JTextField();
         KeySizeField1 = new javax.swing.JTextField();
-        ExportPublicKey1 = new javax.swing.JButton();
-        ImportPrivateKey1 = new javax.swing.JButton();
+        LoadYourPrivateKey = new javax.swing.JButton();
         FileInfoPane1 = new javax.swing.JPanel();
         OutputFileField_Sym1 = new javax.swing.JTextField();
         InputFileField_Sym1 = new javax.swing.JTextField();
@@ -185,16 +161,8 @@ public class UserManager_GUI extends javax.swing.JFrame {
         jLabel21 = new javax.swing.JLabel();
         BrowseInputFile1 = new javax.swing.JButton();
         BrowseOutputFile1 = new javax.swing.JButton();
-        jPanel2 = new javax.swing.JPanel();
-        jComboBox5 = new javax.swing.JComboBox<>();
-        jLabel22 = new javax.swing.JLabel();
-        jLabel23 = new javax.swing.JLabel();
-        jLabel24 = new javax.swing.JLabel();
-        jComboBox6 = new javax.swing.JComboBox<>();
-        jComboBox7 = new javax.swing.JComboBox<>();
-        jLabel25 = new javax.swing.JLabel();
-        jComboBox8 = new javax.swing.JComboBox<>();
         jButton2 = new javax.swing.JButton();
+        SignButton = new javax.swing.JButton();
         MenuBar = new javax.swing.JMenuBar();
         Help = new javax.swing.JMenu();
         About = new javax.swing.JMenu();
@@ -213,13 +181,6 @@ public class UserManager_GUI extends javax.swing.JFrame {
             }
         });
 
-        EncryptWithPublicKey.setText("Encrypt with public key");
-        EncryptWithPublicKey.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                EncryptWithPublicKeyActionPerformed(evt);
-            }
-        });
-        popUpMenu.add(EncryptWithPublicKey);
         popUpMenu.add(jSeparator3);
 
         EditContact.setText("Edit contact");
@@ -232,6 +193,11 @@ public class UserManager_GUI extends javax.swing.JFrame {
         EditContact.getAccessibleContext().setAccessibleName("popEditUser");
 
         DeleteContact.setText("Delete contact");
+        DeleteContact.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                DeleteContactActionPerformed(evt);
+            }
+        });
         popUpMenu.add(DeleteContact);
         DeleteContact.getAccessibleContext().setAccessibleName("pop");
 
@@ -239,301 +205,13 @@ public class UserManager_GUI extends javax.swing.JFrame {
 
         ExportContactInfo.setText("Export contact");
         ExportContactInfo.setActionCommand("");
+        ExportContactInfo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                ExportContactInfoActionPerformed(evt);
+            }
+        });
         popUpMenu.add(ExportContactInfo);
         popUpMenu.add(jSeparator5);
-
-        ShowContactInfo.setText("Show contact info");
-        popUpMenu.add(ShowContactInfo);
-
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setPreferredSize(new java.awt.Dimension(900, 630));
-        setResizable(false);
-        setSize(new java.awt.Dimension(900, 630));
-
-        TabbedPane.setDoubleBuffered(true);
-        TabbedPane.setMaximumSize(new java.awt.Dimension(800, 440));
-        TabbedPane.setMinimumSize(new java.awt.Dimension(800, 440));
-        TabbedPane.setPreferredSize(new java.awt.Dimension(900, 500));
-
-        AccountInfo.setBorder(javax.swing.BorderFactory.createTitledBorder("Your Infomation"));
-
-        HoTenLabel.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
-        HoTenLabel.setText("Họ Tên:");
-
-        EmailLabel.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
-        EmailLabel.setText("Email:");
-
-        AddrLabel.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
-        AddrLabel.setText("Địa chỉ:");
-
-        PhoneLabel.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
-        PhoneLabel.setText("SDT:");
-
-        DoBLabel.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
-        DoBLabel.setText("DoB");
-
-        LoginButton.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
-        LoginButton.setText("Login");
-        LoginButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                LoginButtonActionPerformed(evt);
-            }
-        });
-
-        ExportInfoButton.setText("Export account info");
-
-        UpdateAccButton.setText("Update account info");
-
-        NameField.setEditable(false);
-        NameField.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                NameFieldActionPerformed(evt);
-            }
-        });
-
-        EmailTextField.setEditable(false);
-
-        PhoneTextField.setEditable(false);
-
-        AddrTextField.setEditable(false);
-
-        PasswordLabel.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
-        PasswordLabel.setText("Password:");
-
-        PasswordField.setEditable(false);
-        PasswordField.setText("jPasswordField1");
-
-        DoBTextField.setEditable(false);
-
-        CreateAccountButton.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
-        CreateAccountButton.setText("Create Account");
-        CreateAccountButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                CreateAccountButtonActionPerformed(evt);
-            }
-        });
-
-        javax.swing.GroupLayout AccountInfoLayout = new javax.swing.GroupLayout(AccountInfo);
-        AccountInfo.setLayout(AccountInfoLayout);
-        AccountInfoLayout.setHorizontalGroup(
-            AccountInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(AccountInfoLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(AccountInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(AccountInfoLayout.createSequentialGroup()
-                        .addGroup(AccountInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(EmailLabel)
-                            .addComponent(PasswordLabel)
-                            .addComponent(HoTenLabel)
-                            .addComponent(DoBLabel)
-                            .addComponent(PhoneLabel)
-                            .addComponent(AddrLabel))
-                        .addGap(31, 31, 31)
-                        .addGroup(AccountInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(PhoneTextField, javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(DoBTextField, javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(PasswordField, javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(EmailTextField, javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(NameField)
-                            .addComponent(AddrTextField))
-                        .addContainerGap())
-                    .addGroup(AccountInfoLayout.createSequentialGroup()
-                        .addComponent(UpdateAccButton)
-                        .addGap(18, 18, 18)
-                        .addComponent(ExportInfoButton)
-                        .addGap(0, 16, Short.MAX_VALUE))
-                    .addGroup(AccountInfoLayout.createSequentialGroup()
-                        .addGap(10, 10, 10)
-                        .addGroup(AccountInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(AccountInfoLayout.createSequentialGroup()
-                                .addComponent(CreateAccountButton)
-                                .addGap(39, 39, 39)
-                                .addComponent(LoginButton, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(0, 0, Short.MAX_VALUE))
-                            .addComponent(jSeparator4)))))
-        );
-        AccountInfoLayout.setVerticalGroup(
-            AccountInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(AccountInfoLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(AccountInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(HoTenLabel)
-                    .addComponent(NameField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(8, 8, 8)
-                .addGroup(AccountInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(EmailLabel)
-                    .addComponent(EmailTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(AccountInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(PasswordLabel)
-                    .addComponent(PasswordField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(8, 8, 8)
-                .addGroup(AccountInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(DoBLabel)
-                    .addComponent(DoBTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(8, 8, 8)
-                .addGroup(AccountInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(PhoneLabel)
-                    .addComponent(PhoneTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(8, 8, 8)
-                .addGroup(AccountInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(AddrLabel)
-                    .addComponent(AddrTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jSeparator4, javax.swing.GroupLayout.PREFERRED_SIZE, 7, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(AccountInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(CreateAccountButton, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(LoginButton, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(AccountInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(UpdateAccButton)
-                    .addComponent(ExportInfoButton))
-                .addGap(28, 28, 28))
-        );
-
-        KeyPairInfo.setBorder(javax.swing.BorderFactory.createTitledBorder("Your Key Pair"));
-
-        PublicKeyScrollPane.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-
-        PublicKeyArea.setEditable(false);
-        PublicKeyArea.setColumns(20);
-        PublicKeyArea.setLineWrap(true);
-        PublicKeyArea.setRows(5);
-        PublicKeyScrollPane.setViewportView(PublicKeyArea);
-
-        PrivateKeyScrollPane.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-
-        PrivateKeyArea.setEditable(false);
-        PrivateKeyArea.setColumns(20);
-        PrivateKeyArea.setLineWrap(true);
-        PrivateKeyArea.setRows(5);
-        PrivateKeyScrollPane.setViewportView(PrivateKeyArea);
-
-        jSeparator1.setPreferredSize(new java.awt.Dimension(169, 2));
-
-        jLabel7.setText("Your Public Key");
-
-        jLabel8.setText("Your Private Key");
-
-        KeySizeComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "768", "1024", "2048", "3072", "4096", "8192" }));
-        KeySizeComboBox1.setAutoscrolls(true);
-        KeySizeComboBox1.setDoubleBuffered(true);
-        KeySizeComboBox1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                KeySizeComboBox1ActionPerformed(evt);
-            }
-        });
-
-        CreateKeyPairButton1.setText("Create RSA Key Pair");
-        CreateKeyPairButton1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                CreateKeyPairButton1ActionPerformed(evt);
-            }
-        });
-
-        ExportPrivate1.setText("Export Key Pair & User Info");
-        ExportPrivate1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                ExportPrivate1ActionPerformed(evt);
-            }
-        });
-
-        jLabel11.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
-        jLabel11.setText("Keysize:");
-
-        javax.swing.GroupLayout KeyPairInfoLayout = new javax.swing.GroupLayout(KeyPairInfo);
-        KeyPairInfo.setLayout(KeyPairInfoLayout);
-        KeyPairInfoLayout.setHorizontalGroup(
-            KeyPairInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, KeyPairInfoLayout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 88, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(200, 200, 200))
-            .addGroup(KeyPairInfoLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(KeyPairInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(KeyPairInfoLayout.createSequentialGroup()
-                        .addGroup(KeyPairInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(PublicKeyScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 426, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(PrivateKeyScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 428, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addContainerGap(60, Short.MAX_VALUE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, KeyPairInfoLayout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(jLabel7)
-                        .addGap(211, 211, 211))
-                    .addGroup(KeyPairInfoLayout.createSequentialGroup()
-                        .addGroup(KeyPairInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 426, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGroup(KeyPairInfoLayout.createSequentialGroup()
-                                .addGroup(KeyPairInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(CreateKeyPairButton1)
-                                    .addGroup(KeyPairInfoLayout.createSequentialGroup()
-                                        .addGap(10, 10, 10)
-                                        .addComponent(jLabel11, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                        .addComponent(KeySizeComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                                .addGap(18, 18, 18)
-                                .addComponent(ExportPrivate1)))
-                        .addGap(0, 0, Short.MAX_VALUE))))
-        );
-        KeyPairInfoLayout.setVerticalGroup(
-            KeyPairInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, KeyPairInfoLayout.createSequentialGroup()
-                .addComponent(jLabel7)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(PublicKeyScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 119, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel8)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(PrivateKeyScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 117, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(KeyPairInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(KeyPairInfoLayout.createSequentialGroup()
-                        .addComponent(CreateKeyPairButton1)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(KeyPairInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel11)
-                            .addComponent(KeySizeComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addComponent(ExportPrivate1, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(15, 15, 15))
-        );
-
-        jLabel10.setText("Ghi lam nham gi do duoi day cho do don coi");
-
-        javax.swing.GroupLayout AccountPaneLayout = new javax.swing.GroupLayout(AccountPane);
-        AccountPane.setLayout(AccountPaneLayout);
-        AccountPaneLayout.setHorizontalGroup(
-            AccountPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(AccountPaneLayout.createSequentialGroup()
-                .addGroup(AccountPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(AccountPaneLayout.createSequentialGroup()
-                        .addGap(51, 51, 51)
-                        .addComponent(jLabel10)
-                        .addGap(18, 18, Short.MAX_VALUE))
-                    .addGroup(AccountPaneLayout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(AccountInfo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)))
-                .addComponent(KeyPairInfo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(37, 37, 37))
-        );
-        AccountPaneLayout.setVerticalGroup(
-            AccountPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(AccountPaneLayout.createSequentialGroup()
-                .addGap(35, 35, 35)
-                .addComponent(AccountInfo, javax.swing.GroupLayout.PREFERRED_SIZE, 294, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(34, 34, 34)
-                .addComponent(jLabel10)
-                .addContainerGap(135, Short.MAX_VALUE))
-            .addGroup(AccountPaneLayout.createSequentialGroup()
-                .addComponent(KeyPairInfo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, Short.MAX_VALUE))
-        );
-
-        TabbedPane.addTab("Your Account", AccountPane);
 
         ContactsPane.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
@@ -591,63 +269,17 @@ public class UserManager_GUI extends javax.swing.JFrame {
                 {null, null, null, null, null, null},
                 {null, null, null, null, null, null},
                 {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
                 {null, null, null, null, null, null}
             },
             new String [] {
-                "Họ tên", "Email", "SĐT", "Public Key", "Địa chỉ", "Ngày sinh"
+                "Họ tên", "Email", "Public Key", "SĐT", "Địa chỉ", "Ngày sinh"
             }
         ) {
             Class[] types = new Class [] {
                 java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
             };
             boolean[] canEdit = new boolean [] {
-                true, true, true, false, true, false
+                true, true, false, true, true, false
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -658,14 +290,19 @@ public class UserManager_GUI extends javax.swing.JFrame {
                 return canEdit [columnIndex];
             }
         });
+        UserTable.setColumnSelectionAllowed(true);
         UserTable.setPreferredSize(new java.awt.Dimension(200, 200));
         UserTable.setRowHeight(25);
         UserTable.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                UserTableMouseClicked(evt);
+            }
             public void mousePressed(java.awt.event.MouseEvent evt) {
                 UserTableMousePressed(evt);
             }
         });
         ScrollUserPane.setViewportView(UserTable);
+        UserTable.getColumnModel().getSelectionModel().setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         if (UserTable.getColumnModel().getColumnCount() > 0) {
             UserTable.getColumnModel().getColumn(0).setResizable(false);
             UserTable.getColumnModel().getColumn(1).setResizable(false);
@@ -677,16 +314,19 @@ public class UserManager_GUI extends javax.swing.JFrame {
 
         UserOperationPane.setBorder(javax.swing.BorderFactory.createTitledBorder("Operation"));
 
-        AddUserButton.setText("Add User");
-        AddUserButton.addActionListener(new java.awt.event.ActionListener() {
+        AddContactButton.setText("Add Contact");
+        AddContactButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                AddUserButtonActionPerformed(evt);
+                AddContactButtonActionPerformed(evt);
             }
         });
 
-        GetPublicKeyButton.setText("Get Public Key");
-
-        jButton9.setText("Import new user");
+        RefreshButton.setText("Refresh contacts");
+        RefreshButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                RefreshButtonActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout UserOperationPaneLayout = new javax.swing.GroupLayout(UserOperationPane);
         UserOperationPane.setLayout(UserOperationPaneLayout);
@@ -694,283 +334,314 @@ public class UserManager_GUI extends javax.swing.JFrame {
             UserOperationPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(UserOperationPaneLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(UserOperationPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                    .addComponent(jButton9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(AddUserButton, javax.swing.GroupLayout.DEFAULT_SIZE, 168, Short.MAX_VALUE))
-                .addGap(18, 18, 18)
-                .addComponent(GetPublicKeyButton, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(AddContactButton, javax.swing.GroupLayout.PREFERRED_SIZE, 168, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(RefreshButton, javax.swing.GroupLayout.PREFERRED_SIZE, 142, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(22, Short.MAX_VALUE))
         );
         UserOperationPaneLayout.setVerticalGroup(
             UserOperationPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(UserOperationPaneLayout.createSequentialGroup()
                 .addGroup(UserOperationPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(AddUserButton, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(GetPublicKeyButton, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jButton9, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(24, Short.MAX_VALUE))
+                    .addComponent(AddContactButton, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(RefreshButton, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
-
-        RefreshButton.setText("Refresh");
-        RefreshButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                RefreshButtonActionPerformed(evt);
-            }
-        });
 
         javax.swing.GroupLayout ContactsPaneLayout = new javax.swing.GroupLayout(ContactsPane);
         ContactsPane.setLayout(ContactsPaneLayout);
         ContactsPaneLayout.setHorizontalGroup(
             ContactsPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(ScrollUserPane, javax.swing.GroupLayout.DEFAULT_SIZE, 871, Short.MAX_VALUE)
             .addGroup(ContactsPaneLayout.createSequentialGroup()
+                .addComponent(ScrollUserPane, javax.swing.GroupLayout.DEFAULT_SIZE, 861, Short.MAX_VALUE)
+                .addContainerGap())
+            .addGroup(ContactsPaneLayout.createSequentialGroup()
+                .addGap(219, 219, 219)
                 .addComponent(UserOperationPane, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(45, 45, 45)
-                .addComponent(RefreshButton, javax.swing.GroupLayout.PREFERRED_SIZE, 206, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         ContactsPaneLayout.setVerticalGroup(
             ContactsPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, ContactsPaneLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(ScrollUserPane, javax.swing.GroupLayout.PREFERRED_SIZE, 250, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(ContactsPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(UserOperationPane, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(RefreshButton, javax.swing.GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(39, 39, 39))
+                .addComponent(ScrollUserPane, javax.swing.GroupLayout.PREFERRED_SIZE, 299, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(UserOperationPane, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(82, Short.MAX_VALUE))
         );
 
-        TabbedPane.addTab("Contacts", ContactsPane);
+        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("Keys Manager");
+        setResizable(false);
+        setSize(new java.awt.Dimension(900, 530));
 
-        OutputFileField.setEditable(false);
-        OutputFileField.setFont(new java.awt.Font("Tahoma", 2, 11)); // NOI18N
-        OutputFileField.addActionListener(new java.awt.event.ActionListener() {
+        TabbedPane.setDoubleBuffered(true);
+        TabbedPane.setMaximumSize(new java.awt.Dimension(800, 440));
+        TabbedPane.setMinimumSize(new java.awt.Dimension(800, 440));
+        TabbedPane.setPreferredSize(new java.awt.Dimension(900, 500));
+
+        AccountInfo.setBorder(javax.swing.BorderFactory.createTitledBorder("Your Infomation"));
+
+        HoTenLabel.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        HoTenLabel.setText("Họ Tên:");
+
+        EmailLabel.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        EmailLabel.setText("Email:");
+
+        AddrLabel.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        AddrLabel.setText("Địa chỉ:");
+
+        PhoneLabel.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        PhoneLabel.setText("SDT:");
+
+        DoBLabel.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        DoBLabel.setText("DoB");
+
+        ExportInfoButton.setText("Export account info");
+        ExportInfoButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                OutputFileFieldActionPerformed(evt);
+                ExportInfoButtonActionPerformed(evt);
             }
         });
 
-        VerifyButton.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
-        VerifyButton.setText("Verify");
-        VerifyButton.addActionListener(new java.awt.event.ActionListener() {
+        UpdateAccButton.setText("Update account info");
+        UpdateAccButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                VerifyButtonActionPerformed(evt);
+                UpdateAccButtonActionPerformed(evt);
             }
         });
 
-        ExportPublic.setText("Export Public Key");
-        ExportPublic.addActionListener(new java.awt.event.ActionListener() {
+        NameField.setEditable(false);
+        NameField.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                ExportPublicActionPerformed(evt);
+                NameFieldActionPerformed(evt);
             }
         });
 
-        EncryptButton.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
-        EncryptButton.setText("Encrypt");
-        EncryptButton.addActionListener(new java.awt.event.ActionListener() {
+        EmailTextField.setEditable(false);
+        EmailTextField.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                EncryptButtonActionPerformed(evt);
+                EmailTextFieldActionPerformed(evt);
             }
         });
 
-        DecryptButton.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
-        DecryptButton.setText("Decrypt");
-        DecryptButton.addActionListener(new java.awt.event.ActionListener() {
+        PhoneTextField.setEditable(false);
+
+        AddrTextField.setEditable(false);
+
+        PasswordLabel.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        PasswordLabel.setText("Password:");
+
+        PasswordField.setEditable(false);
+        PasswordField.setText("jPasswordField1");
+
+        DoBTextField.setEditable(false);
+
+        jButton3.setText("Refresh");
+        jButton3.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                DecryptButtonActionPerformed(evt);
+                jButton3ActionPerformed(evt);
             }
         });
 
-        jLabel2.setText("Input File");
-
-        jLabel4.setText("Output File");
-
-        KeySizeBox.setFont(new java.awt.Font("Tahoma", 2, 11)); // NOI18N
-        KeySizeBox.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                KeySizeBoxActionPerformed(evt);
-            }
-        });
-
-        ExportPrivate.setText("Export Private Key");
-        ExportPrivate.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                ExportPrivateActionPerformed(evt);
-            }
-        });
-
-        jLabel1.setText("Điền keysize");
-
-        ImportPublicKey.setText("ImportPublicKey");
-        ImportPublicKey.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                ImportPublicKeyActionPerformed(evt);
-            }
-        });
-
-        InputFileField.setEditable(false);
-        InputFileField.setFont(new java.awt.Font("Tahoma", 2, 11)); // NOI18N
-        InputFileField.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                InputFileFieldActionPerformed(evt);
-            }
-        });
-
-        ImportPrivateKey.setText("ImportPrivateKey");
-        ImportPrivateKey.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                ImportPrivateKeyActionPerformed(evt);
-            }
-        });
-
-        FileButton_1.setText("...");
-        FileButton_1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                FileButton_1ActionPerformed(evt);
-            }
-        });
-
-        CreateKeyPairButton.setText("Create RSA Key Pair");
-        CreateKeyPairButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                CreateKeyPairButtonActionPerformed(evt);
-            }
-        });
-
-        FileButton_2.setText("...");
-        FileButton_2.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                FileButton_2ActionPerformed(evt);
-            }
-        });
-
-        SignButton.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
-        SignButton.setText("Sign");
-        SignButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                SignButtonActionPerformed(evt);
-            }
-        });
-
-        CommandLine.setEditable(false);
-        CommandLine.setBackground(new java.awt.Color(0, 0, 0));
-        CommandLine.setColumns(20);
-        CommandLine.setForeground(new java.awt.Color(0, 255, 0));
-        CommandLine.setLineWrap(true);
-        CommandLine.setRows(5);
-        CommandLine.setWrapStyleWord(true);
-        CommandLine.setAutoscrolls(false);
-        jScrollPane1.setViewportView(CommandLine);
-
-        javax.swing.GroupLayout AsymmetricTabLayout = new javax.swing.GroupLayout(AsymmetricTab);
-        AsymmetricTab.setLayout(AsymmetricTabLayout);
-        AsymmetricTabLayout.setHorizontalGroup(
-            AsymmetricTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(AsymmetricTabLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(AsymmetricTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, AsymmetricTabLayout.createSequentialGroup()
-                        .addGroup(AsymmetricTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, AsymmetricTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                .addGroup(AsymmetricTabLayout.createSequentialGroup()
-                                    .addGap(7, 7, 7)
-                                    .addComponent(jLabel1)
-                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                    .addComponent(KeySizeBox, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addComponent(ExportPublic, javax.swing.GroupLayout.PREFERRED_SIZE, 129, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addComponent(CreateKeyPairButton))
-                            .addGroup(AsymmetricTabLayout.createSequentialGroup()
-                                .addComponent(ExportPrivate, javax.swing.GroupLayout.PREFERRED_SIZE, 129, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(2, 2, 2)))
-                        .addGap(16, 16, 16)
-                        .addGroup(AsymmetricTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 56, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 63, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addGroup(AsymmetricTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(InputFileField)
-                            .addComponent(OutputFileField, javax.swing.GroupLayout.PREFERRED_SIZE, 268, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, AsymmetricTabLayout.createSequentialGroup()
-                                .addGroup(AsymmetricTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                    .addComponent(ImportPublicKey)
-                                    .addComponent(EncryptButton, javax.swing.GroupLayout.PREFERRED_SIZE, 87, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(SignButton, javax.swing.GroupLayout.PREFERRED_SIZE, 87, javax.swing.GroupLayout.PREFERRED_SIZE))
+        javax.swing.GroupLayout AccountInfoLayout = new javax.swing.GroupLayout(AccountInfo);
+        AccountInfo.setLayout(AccountInfoLayout);
+        AccountInfoLayout.setHorizontalGroup(
+            AccountInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(AccountInfoLayout.createSequentialGroup()
+                .addGap(10, 10, 10)
+                .addGroup(AccountInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(AccountInfoLayout.createSequentialGroup()
+                        .addGroup(AccountInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(AccountInfoLayout.createSequentialGroup()
+                                .addGroup(AccountInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(EmailLabel)
+                                    .addComponent(PasswordLabel)
+                                    .addComponent(HoTenLabel)
+                                    .addComponent(DoBLabel)
+                                    .addComponent(PhoneLabel)
+                                    .addComponent(AddrLabel))
+                                .addGap(31, 31, 31)
+                                .addGroup(AccountInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addComponent(PhoneTextField, javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(DoBTextField, javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(PasswordField, javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(EmailTextField, javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(NameField)
+                                    .addComponent(AddrTextField)))
+                            .addGroup(AccountInfoLayout.createSequentialGroup()
+                                .addGap(25, 25, 25)
+                                .addComponent(UpdateAccButton)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addGroup(AsymmetricTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(DecryptButton, javax.swing.GroupLayout.PREFERRED_SIZE, 87, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(ImportPrivateKey)
-                                    .addComponent(VerifyButton, javax.swing.GroupLayout.PREFERRED_SIZE, 87, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addGroup(AsymmetricTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(FileButton_1, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(FileButton_2, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addContainerGap(334, Short.MAX_VALUE))
-                    .addGroup(AsymmetricTabLayout.createSequentialGroup()
-                        .addComponent(jScrollPane1)
-                        .addGap(20, 20, 20))))
+                                .addComponent(ExportInfoButton)
+                                .addGap(23, 23, 23)))
+                        .addContainerGap())
+                    .addComponent(jSeparator4)))
+            .addGroup(AccountInfoLayout.createSequentialGroup()
+                .addGap(100, 100, 100)
+                .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 129, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, Short.MAX_VALUE))
         );
-        AsymmetricTabLayout.setVerticalGroup(
-            AsymmetricTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, AsymmetricTabLayout.createSequentialGroup()
+        AccountInfoLayout.setVerticalGroup(
+            AccountInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(AccountInfoLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 142, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(13, 13, 13)
-                .addGroup(AsymmetricTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(AsymmetricTabLayout.createSequentialGroup()
-                        .addGap(11, 11, 11)
-                        .addGroup(AsymmetricTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(AsymmetricTabLayout.createSequentialGroup()
-                                .addGap(29, 29, 29)
-                                .addGroup(AsymmetricTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                    .addComponent(KeySizeBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(ExportPublic)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(ExportPrivate))
-                            .addGroup(AsymmetricTabLayout.createSequentialGroup()
-                                .addComponent(CreateKeyPairButton)
-                                .addGap(50, 50, 50)))
-                        .addGap(186, 186, 186))
-                    .addGroup(AsymmetricTabLayout.createSequentialGroup()
-                        .addGroup(AsymmetricTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(AsymmetricTabLayout.createSequentialGroup()
-                                .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addComponent(InputFileField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGroup(AsymmetricTabLayout.createSequentialGroup()
-                                .addComponent(FileButton_1)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addGroup(AsymmetricTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                    .addComponent(FileButton_2)
-                                    .addComponent(OutputFileField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(AsymmetricTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(ImportPrivateKey)
-                            .addComponent(ImportPublicKey))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addGroup(AsymmetricTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(EncryptButton, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(DecryptButton, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(25, 25, 25)
-                        .addGroup(AsymmetricTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(SignButton, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(VerifyButton, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                .addGroup(AccountInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(HoTenLabel)
+                    .addComponent(NameField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(8, 8, 8)
+                .addGroup(AccountInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(EmailLabel)
+                    .addComponent(EmailTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(AccountInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(PasswordLabel)
+                    .addComponent(PasswordField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(8, 8, 8)
+                .addGroup(AccountInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(DoBLabel)
+                    .addComponent(DoBTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(8, 8, 8)
+                .addGroup(AccountInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(PhoneLabel)
+                    .addComponent(PhoneTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(8, 8, 8)
+                .addGroup(AccountInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(AddrLabel)
+                    .addComponent(AddrTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jSeparator4, javax.swing.GroupLayout.PREFERRED_SIZE, 7, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(AccountInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(UpdateAccButton)
+                    .addComponent(ExportInfoButton))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jButton3)
+                .addGap(36, 36, 36))
         );
 
-        TabbedPane.addTab("Asymmetric Encryption", AsymmetricTab);
+        KeyPairInfo.setBorder(javax.swing.BorderFactory.createTitledBorder("Key Pair Info"));
+
+        PublicKeyScrollPane.setBorder(javax.swing.BorderFactory.createTitledBorder("Public Key"));
+        PublicKeyScrollPane.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        PublicKeyScrollPane.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+
+        PublicKeyArea.setEditable(false);
+        PublicKeyArea.setColumns(20);
+        PublicKeyArea.setLineWrap(true);
+        PublicKeyArea.setRows(5);
+        PublicKeyScrollPane.setViewportView(PublicKeyArea);
+
+        PrivateKeyScrollPane.setBorder(javax.swing.BorderFactory.createTitledBorder("Private Key"));
+        PrivateKeyScrollPane.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        PrivateKeyScrollPane.setToolTipText("");
+        PrivateKeyScrollPane.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+
+        PrivateKeyArea.setEditable(false);
+        PrivateKeyArea.setColumns(20);
+        PrivateKeyArea.setLineWrap(true);
+        PrivateKeyArea.setRows(5);
+        PrivateKeyScrollPane.setViewportView(PrivateKeyArea);
+
+        KeySizeComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "768", "1024", "2048", "3072", "4096", "8192" }));
+        KeySizeComboBox1.setAutoscrolls(true);
+        KeySizeComboBox1.setDoubleBuffered(true);
+        KeySizeComboBox1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                KeySizeComboBox1ActionPerformed(evt);
+            }
+        });
+
+        CreateKeyPairButton1.setText("Create RSA Key Pair");
+        CreateKeyPairButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                CreateKeyPairButton1ActionPerformed(evt);
+            }
+        });
+
+        SaveKeyPairToAccount.setText("Save this key pair to your account");
+        SaveKeyPairToAccount.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                SaveKeyPairToAccountActionPerformed(evt);
+            }
+        });
+
+        jLabel11.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        jLabel11.setText("Keysize:");
+
+        javax.swing.GroupLayout KeyPairInfoLayout = new javax.swing.GroupLayout(KeyPairInfo);
+        KeyPairInfo.setLayout(KeyPairInfoLayout);
+        KeyPairInfoLayout.setHorizontalGroup(
+            KeyPairInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(KeyPairInfoLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(KeyPairInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(KeyPairInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                        .addComponent(PublicKeyScrollPane)
+                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, KeyPairInfoLayout.createSequentialGroup()
+                            .addGap(469, 469, 469)
+                            .addComponent(jSeparator1, javax.swing.GroupLayout.DEFAULT_SIZE, 1, Short.MAX_VALUE))
+                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, KeyPairInfoLayout.createSequentialGroup()
+                            .addGroup(KeyPairInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addComponent(CreateKeyPairButton1)
+                                .addGroup(KeyPairInfoLayout.createSequentialGroup()
+                                    .addComponent(jLabel11, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addGap(18, 18, 18)
+                                    .addComponent(KeySizeComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addGap(30, 30, 30)
+                            .addComponent(SaveKeyPairToAccount, javax.swing.GroupLayout.PREFERRED_SIZE, 232, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addComponent(PrivateKeyScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 463, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        KeyPairInfoLayout.setVerticalGroup(
+            KeyPairInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(KeyPairInfoLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(PublicKeyScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 154, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(KeyPairInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(KeyPairInfoLayout.createSequentialGroup()
+                        .addComponent(PrivateKeyScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 167, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addGroup(KeyPairInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(KeyPairInfoLayout.createSequentialGroup()
+                                .addComponent(CreateKeyPairButton1)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(KeyPairInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(jLabel11)
+                                    .addComponent(KeySizeComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addComponent(SaveKeyPairToAccount, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                .addContainerGap(44, Short.MAX_VALUE))
+        );
+
+        javax.swing.GroupLayout AccountPaneLayout = new javax.swing.GroupLayout(AccountPane);
+        AccountPane.setLayout(AccountPaneLayout);
+        AccountPaneLayout.setHorizontalGroup(
+            AccountPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(AccountPaneLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(AccountInfo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(KeyPairInfo, javax.swing.GroupLayout.PREFERRED_SIZE, 494, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(22, 22, 22))
+        );
+        AccountPaneLayout.setVerticalGroup(
+            AccountPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(AccountPaneLayout.createSequentialGroup()
+                .addGap(35, 35, 35)
+                .addComponent(AccountInfo, javax.swing.GroupLayout.PREFERRED_SIZE, 293, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(144, Short.MAX_VALUE))
+            .addComponent(KeyPairInfo, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+
+        TabbedPane.addTab("Your Account", AccountPane);
 
         KeyInfoPane.setBorder(javax.swing.BorderFactory.createTitledBorder("Public key info"));
 
         jScrollPane2.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 
-        PublicKeyTextArea.setEditable(false);
         PublicKeyTextArea.setColumns(20);
-        PublicKeyTextArea.setForeground(new java.awt.Color(0, 255, 0));
         PublicKeyTextArea.setLineWrap(true);
         PublicKeyTextArea.setRows(5);
         PublicKeyTextArea.setWrapStyleWord(true);
@@ -978,13 +649,6 @@ public class UserManager_GUI extends javax.swing.JFrame {
         PublicKeyTextArea.setCaretColor(new java.awt.Color(255, 255, 255));
         PublicKeyTextArea.setDoubleBuffered(true);
         jScrollPane2.setViewportView(PublicKeyTextArea);
-
-        KeySizeBox_Sym.setFont(new java.awt.Font("Tahoma", 2, 11)); // NOI18N
-        KeySizeBox_Sym.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                KeySizeBox_SymActionPerformed(evt);
-            }
-        });
 
         jLabel3.setText("Algorithm:");
 
@@ -1000,81 +664,49 @@ public class UserManager_GUI extends javax.swing.JFrame {
 
         KeySizeField.setEditable(false);
 
-        ExportPublicKey.setText("Export Public Key");
-        ExportPublicKey.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                ExportPublicKeyActionPerformed(evt);
-            }
-        });
-
-        ImportPublicKey1.setText("ImportPublicKey");
-        ImportPublicKey1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                ImportPublicKey1ActionPerformed(evt);
-            }
-        });
-
         javax.swing.GroupLayout KeyInfoPaneLayout = new javax.swing.GroupLayout(KeyInfoPane);
         KeyInfoPane.setLayout(KeyInfoPaneLayout);
         KeyInfoPaneLayout.setHorizontalGroup(
             KeyInfoPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(KeyInfoPaneLayout.createSequentialGroup()
-                .addGap(2, 2, 2)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 266, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
                 .addGroup(KeyInfoPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(KeyInfoPaneLayout.createSequentialGroup()
-                        .addComponent(jLabel3)
-                        .addGap(18, 18, 18)
-                        .addComponent(AlgorithmField))
-                    .addGroup(KeyInfoPaneLayout.createSequentialGroup()
-                        .addComponent(jLabel9)
-                        .addGap(12, 12, 12)
-                        .addComponent(KeyOwnerField, javax.swing.GroupLayout.DEFAULT_SIZE, 127, Short.MAX_VALUE))
-                    .addGroup(KeyInfoPaneLayout.createSequentialGroup()
-                        .addComponent(jLabel12)
-                        .addGap(24, 24, 24)
-                        .addComponent(KeySizeField, javax.swing.GroupLayout.DEFAULT_SIZE, 127, Short.MAX_VALUE))
-                    .addGroup(KeyInfoPaneLayout.createSequentialGroup()
+                        .addGap(8, 8, 8)
                         .addGroup(KeyInfoPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(ExportPublicKey)
-                            .addComponent(ImportPublicKey1))
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                            .addGroup(KeyInfoPaneLayout.createSequentialGroup()
+                                .addComponent(jLabel12)
+                                .addGap(24, 24, 24)
+                                .addComponent(KeySizeField))
+                            .addGroup(KeyInfoPaneLayout.createSequentialGroup()
+                                .addComponent(jLabel3)
+                                .addGap(18, 18, 18)
+                                .addComponent(AlgorithmField))
+                            .addGroup(KeyInfoPaneLayout.createSequentialGroup()
+                                .addComponent(jLabel9)
+                                .addGap(12, 12, 12)
+                                .addComponent(KeyOwnerField))))
+                    .addGroup(KeyInfoPaneLayout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 365, Short.MAX_VALUE)))
                 .addContainerGap())
-            .addGroup(KeyInfoPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(KeyInfoPaneLayout.createSequentialGroup()
-                    .addGap(165, 165, 165)
-                    .addComponent(KeySizeBox_Sym, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addContainerGap(262, Short.MAX_VALUE)))
         );
         KeyInfoPaneLayout.setVerticalGroup(
             KeyInfoPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(KeyInfoPaneLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(KeyInfoPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel3)
-                    .addComponent(AlgorithmField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jScrollPane2)
+                .addGap(18, 18, 18)
                 .addGroup(KeyInfoPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel9)
                     .addComponent(KeyOwnerField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(KeyInfoPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel3)
+                    .addComponent(AlgorithmField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(KeyInfoPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel12)
                     .addComponent(KeySizeField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
-                .addComponent(ExportPublicKey)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(ImportPublicKey1)
-                .addContainerGap(51, Short.MAX_VALUE))
-            .addGroup(KeyInfoPaneLayout.createSequentialGroup()
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 197, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, Short.MAX_VALUE))
-            .addGroup(KeyInfoPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(KeyInfoPaneLayout.createSequentialGroup()
-                    .addGap(72, 72, 72)
-                    .addComponent(KeySizeBox_Sym, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addContainerGap(127, Short.MAX_VALUE)))
+                .addContainerGap())
         );
 
         FileInfoPane.setBorder(javax.swing.BorderFactory.createTitledBorder("Encryptor"));
@@ -1119,11 +751,7 @@ public class UserManager_GUI extends javax.swing.JFrame {
 
         jLabel13.setText("Symmetric Algorithm:");
 
-        jLabel14.setText("Session key's size:");
-
         jLabel15.setText("Padding scheme:");
-
-        SessionKeyComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "128", "256" }));
 
         PadSchemeComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "PKCS5Padding", "ISO10126Padding" }));
         PadSchemeComboBox.addActionListener(new java.awt.event.ActionListener() {
@@ -1141,18 +769,16 @@ public class UserManager_GUI extends javax.swing.JFrame {
         SessionKeyInfoPaneLayout.setHorizontalGroup(
             SessionKeyInfoPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(SessionKeyInfoPaneLayout.createSequentialGroup()
-                .addGap(28, 28, 28)
+                .addGap(75, 75, 75)
                 .addGroup(SessionKeyInfoPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel13)
                     .addComponent(jLabel15)
-                    .addComponent(jLabel14)
+                    .addComponent(jLabel13)
                     .addComponent(jLabel16))
                 .addGap(18, 18, 18)
                 .addGroup(SessionKeyInfoPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(ModOpComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(SessionKeyComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(PadSchemeComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(SymAlgoComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(SymAlgoComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(PadSchemeComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         SessionKeyInfoPaneLayout.setVerticalGroup(
@@ -1162,25 +788,30 @@ public class UserManager_GUI extends javax.swing.JFrame {
                 .addGroup(SessionKeyInfoPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel13)
                     .addComponent(SymAlgoComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(SessionKeyInfoPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel14)
-                    .addComponent(SessionKeyComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(SessionKeyInfoPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel15)
-                    .addComponent(PadSchemeComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGap(18, 18, 18)
                 .addGroup(SessionKeyInfoPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel16)
                     .addComponent(ModOpComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(13, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 17, Short.MAX_VALUE)
+                .addGroup(SessionKeyInfoPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(PadSchemeComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel15))
+                .addContainerGap())
         );
 
-        jButton1.setText("Encrypt");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        EncryptButton.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
+        EncryptButton.setText("Encrypt");
+        EncryptButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                EncryptButtonActionPerformed(evt);
+            }
+        });
+
+        VerifyButton.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
+        VerifyButton.setText("Verify");
+        VerifyButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                VerifyButtonActionPerformed(evt);
             }
         });
 
@@ -1189,30 +820,36 @@ public class UserManager_GUI extends javax.swing.JFrame {
         FileInfoPaneLayout.setHorizontalGroup(
             FileInfoPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(FileInfoPaneLayout.createSequentialGroup()
-                .addGap(18, 18, 18)
-                .addGroup(FileInfoPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                .addGroup(FileInfoPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(FileInfoPaneLayout.createSequentialGroup()
-                        .addComponent(SessionKeyInfoPane, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addContainerGap()
+                        .addComponent(SessionKeyInfoPane, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(FileInfoPaneLayout.createSequentialGroup()
                         .addGap(18, 18, 18)
-                        .addComponent(jButton1))
-                    .addGroup(FileInfoPaneLayout.createSequentialGroup()
                         .addGroup(FileInfoPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 56, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 63, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(FileInfoPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(InputFileField_Sym)
-                            .addComponent(OutputFileField_Sym, javax.swing.GroupLayout.PREFERRED_SIZE, 268, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(OutputFileField_Sym, javax.swing.GroupLayout.DEFAULT_SIZE, 268, Short.MAX_VALUE)
+                            .addComponent(InputFileField_Sym))
                         .addGap(18, 18, 18)
                         .addGroup(FileInfoPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(BrowseInputFile, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(BrowseOutputFile, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addGap(34, 34, 34))
+                            .addComponent(BrowseOutputFile, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addContainerGap())
+            .addGroup(FileInfoPaneLayout.createSequentialGroup()
+                .addGap(102, 102, 102)
+                .addComponent(EncryptButton, javax.swing.GroupLayout.PREFERRED_SIZE, 87, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(42, 42, 42)
+                .addComponent(VerifyButton, javax.swing.GroupLayout.PREFERRED_SIZE, 87, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         FileInfoPaneLayout.setVerticalGroup(
             FileInfoPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(FileInfoPaneLayout.createSequentialGroup()
-                .addContainerGap()
+                .addGap(21, 21, 21)
                 .addGroup(FileInfoPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(FileInfoPaneLayout.createSequentialGroup()
                         .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -1226,14 +863,13 @@ public class UserManager_GUI extends javax.swing.JFrame {
                         .addGroup(FileInfoPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(OutputFileField_Sym, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(BrowseOutputFile))))
-                .addGroup(FileInfoPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(FileInfoPaneLayout.createSequentialGroup()
-                        .addGap(3, 3, 3)
-                        .addComponent(SessionKeyInfoPane, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, FileInfoPaneLayout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(86, 86, 86))))
+                .addGap(46, 46, 46)
+                .addComponent(SessionKeyInfoPane, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addGroup(FileInfoPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(EncryptButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(VerifyButton, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(42, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout EncryptTabLayout = new javax.swing.GroupLayout(EncryptTab);
@@ -1242,29 +878,28 @@ public class UserManager_GUI extends javax.swing.JFrame {
             EncryptTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(EncryptTabLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(EncryptTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(KeyInfoPane, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(FileInfoPane, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap(363, Short.MAX_VALUE))
+                .addComponent(KeyInfoPane, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(18, 18, 18)
+                .addComponent(FileInfoPane, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18))
         );
         EncryptTabLayout.setVerticalGroup(
             EncryptTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(EncryptTabLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(KeyInfoPane, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(FileInfoPane, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(EncryptTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(KeyInfoPane, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(FileInfoPane, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(71, Short.MAX_VALUE))
         );
 
-        TabbedPane.addTab("Encryptor", EncryptTab);
+        TabbedPane.addTab("Encryptor - Verifier", EncryptTab);
 
         KeyInfoPane1.setBorder(javax.swing.BorderFactory.createTitledBorder("Private key info"));
 
         jScrollPane3.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 
-        CommandLine_Sym1.setEditable(false);
         CommandLine_Sym1.setColumns(20);
-        CommandLine_Sym1.setForeground(new java.awt.Color(0, 255, 0));
         CommandLine_Sym1.setLineWrap(true);
         CommandLine_Sym1.setRows(5);
         CommandLine_Sym1.setWrapStyleWord(true);
@@ -1272,13 +907,6 @@ public class UserManager_GUI extends javax.swing.JFrame {
         CommandLine_Sym1.setCaretColor(new java.awt.Color(255, 255, 255));
         CommandLine_Sym1.setDoubleBuffered(true);
         jScrollPane3.setViewportView(CommandLine_Sym1);
-
-        KeySizeBox_Sym1.setFont(new java.awt.Font("Tahoma", 2, 11)); // NOI18N
-        KeySizeBox_Sym1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                KeySizeBox_Sym1ActionPerformed(evt);
-            }
-        });
 
         jLabel17.setText("Algorithm:");
 
@@ -1294,17 +922,10 @@ public class UserManager_GUI extends javax.swing.JFrame {
 
         KeySizeField1.setEditable(false);
 
-        ExportPublicKey1.setText("Export Public Key");
-        ExportPublicKey1.addActionListener(new java.awt.event.ActionListener() {
+        LoadYourPrivateKey.setText("Load your private key");
+        LoadYourPrivateKey.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                ExportPublicKey1ActionPerformed(evt);
-            }
-        });
-
-        ImportPrivateKey1.setText("ImportPrivateKey");
-        ImportPrivateKey1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                ImportPrivateKey1ActionPerformed(evt);
+                LoadYourPrivateKeyActionPerformed(evt);
             }
         });
 
@@ -1314,60 +935,43 @@ public class UserManager_GUI extends javax.swing.JFrame {
             KeyInfoPane1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(KeyInfoPane1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 266, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 519, Short.MAX_VALUE)
+                .addGap(18, 18, 18)
                 .addGroup(KeyInfoPane1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(KeyInfoPane1Layout.createSequentialGroup()
-                        .addComponent(jLabel17)
-                        .addGap(18, 18, 18)
-                        .addComponent(AlgorithmField1))
-                    .addGroup(KeyInfoPane1Layout.createSequentialGroup()
-                        .addComponent(jLabel18)
-                        .addGap(12, 12, 12)
-                        .addComponent(KeyOwnerField1, javax.swing.GroupLayout.DEFAULT_SIZE, 127, Short.MAX_VALUE))
-                    .addGroup(KeyInfoPane1Layout.createSequentialGroup()
-                        .addComponent(jLabel19)
-                        .addGap(24, 24, 24)
-                        .addComponent(KeySizeField1, javax.swing.GroupLayout.DEFAULT_SIZE, 127, Short.MAX_VALUE))
-                    .addGroup(KeyInfoPane1Layout.createSequentialGroup()
-                        .addGroup(KeyInfoPane1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(ExportPublicKey1)
-                            .addComponent(ImportPrivateKey1))
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                    .addComponent(jLabel17)
+                    .addComponent(jLabel18)
+                    .addComponent(jLabel19))
+                .addGap(12, 12, 12)
+                .addGroup(KeyInfoPane1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(LoadYourPrivateKey)
+                    .addGroup(KeyInfoPane1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(KeySizeField1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 163, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(AlgorithmField1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 163, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(KeyOwnerField1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 163, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
-            .addGroup(KeyInfoPane1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(KeyInfoPane1Layout.createSequentialGroup()
-                    .addGap(165, 165, 165)
-                    .addComponent(KeySizeBox_Sym1, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addContainerGap(262, Short.MAX_VALUE)))
         );
         KeyInfoPane1Layout.setVerticalGroup(
             KeyInfoPane1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(KeyInfoPane1Layout.createSequentialGroup()
-                .addContainerGap(22, Short.MAX_VALUE)
-                .addGroup(KeyInfoPane1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(KeyInfoPane1Layout.createSequentialGroup()
-                        .addGroup(KeyInfoPane1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel17)
-                            .addComponent(AlgorithmField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addGroup(KeyInfoPane1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel18)
-                            .addComponent(KeyOwnerField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addGroup(KeyInfoPane1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel19)
-                            .addComponent(KeySizeField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(18, 18, 18)
-                        .addComponent(ExportPublicKey1)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(ImportPrivateKey1))
-                    .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 179, javax.swing.GroupLayout.PREFERRED_SIZE)))
-            .addGroup(KeyInfoPane1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(KeyInfoPane1Layout.createSequentialGroup()
-                    .addGap(72, 72, 72)
-                    .addComponent(KeySizeBox_Sym1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addContainerGap(109, Short.MAX_VALUE)))
+                .addContainerGap()
+                .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 190, Short.MAX_VALUE)
+                .addContainerGap())
+            .addGroup(KeyInfoPane1Layout.createSequentialGroup()
+                .addGap(31, 31, 31)
+                .addGroup(KeyInfoPane1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel17)
+                    .addComponent(AlgorithmField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(KeyInfoPane1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel18)
+                    .addComponent(KeyOwnerField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(KeyInfoPane1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel19)
+                    .addComponent(KeySizeField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addComponent(LoadYourPrivateKey)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         FileInfoPane1.setBorder(javax.swing.BorderFactory.createTitledBorder("Decryptor"));
@@ -1406,74 +1010,7 @@ public class UserManager_GUI extends javax.swing.JFrame {
             }
         });
 
-        jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder("Session key"));
-
-        jComboBox5.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-        jComboBox5.setEnabled(false);
-        jComboBox5.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jComboBox5ActionPerformed(evt);
-            }
-        });
-
-        jLabel22.setText("Symmetric Algorithm:");
-
-        jLabel23.setText("Session key's size:");
-
-        jLabel24.setText("Padding scheme:");
-
-        jComboBox6.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-        jComboBox6.setEnabled(false);
-
-        jComboBox7.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-        jComboBox7.setEnabled(false);
-
-        jLabel25.setText("Mode of Operation:");
-
-        jComboBox8.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-        jComboBox8.setEnabled(false);
-
-        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
-        jPanel2.setLayout(jPanel2Layout);
-        jPanel2Layout.setHorizontalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createSequentialGroup()
-                .addGap(28, 28, 28)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel22)
-                    .addComponent(jLabel24)
-                    .addComponent(jLabel23)
-                    .addComponent(jLabel25))
-                .addGap(18, 18, 18)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jComboBox8, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jComboBox6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jComboBox7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jComboBox5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(38, Short.MAX_VALUE))
-        );
-        jPanel2Layout.setVerticalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel22)
-                    .addComponent(jComboBox5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel23)
-                    .addComponent(jComboBox6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel24)
-                    .addComponent(jComboBox7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel25)
-                    .addComponent(jComboBox8, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-
+        jButton2.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
         jButton2.setText("Decrypt");
         jButton2.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1481,30 +1018,40 @@ public class UserManager_GUI extends javax.swing.JFrame {
             }
         });
 
+        SignButton.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
+        SignButton.setText("Sign");
+        SignButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                SignButtonActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout FileInfoPane1Layout = new javax.swing.GroupLayout(FileInfoPane1);
         FileInfoPane1.setLayout(FileInfoPane1Layout);
         FileInfoPane1Layout.setHorizontalGroup(
             FileInfoPane1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(FileInfoPane1Layout.createSequentialGroup()
-                .addGap(18, 18, 18)
-                .addGroup(FileInfoPane1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, FileInfoPane1Layout.createSequentialGroup()
+                .addGroup(FileInfoPane1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(FileInfoPane1Layout.createSequentialGroup()
-                        .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(34, 34, 34)
-                        .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addContainerGap(148, Short.MAX_VALUE)
+                        .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 89, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(36, 36, 36)
+                        .addComponent(SignButton, javax.swing.GroupLayout.PREFERRED_SIZE, 89, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(49, 49, 49))
                     .addGroup(FileInfoPane1Layout.createSequentialGroup()
+                        .addGap(18, 18, 18)
                         .addGroup(FileInfoPane1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel20, javax.swing.GroupLayout.PREFERRED_SIZE, 56, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel21, javax.swing.GroupLayout.PREFERRED_SIZE, 63, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addGroup(FileInfoPane1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(InputFileField_Sym1)
-                            .addComponent(OutputFileField_Sym1, javax.swing.GroupLayout.PREFERRED_SIZE, 268, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(37, 37, 37)
                         .addGroup(FileInfoPane1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(BrowseInputFile1, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(BrowseOutputFile1, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addGap(15, 15, 15))
+                            .addComponent(InputFileField_Sym1)
+                            .addComponent(OutputFileField_Sym1))))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(FileInfoPane1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(BrowseInputFile1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(BrowseOutputFile1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(45, 45, 45))
         );
         FileInfoPane1Layout.setVerticalGroup(
             FileInfoPane1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1515,22 +1062,19 @@ public class UserManager_GUI extends javax.swing.JFrame {
                         .addComponent(jLabel20, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(jLabel21, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(InputFileField_Sym1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(FileInfoPane1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(InputFileField_Sym1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(BrowseInputFile1))
                     .addGroup(FileInfoPane1Layout.createSequentialGroup()
-                        .addGap(34, 34, 34)
-                        .addComponent(OutputFileField_Sym1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(FileInfoPane1Layout.createSequentialGroup()
-                        .addComponent(BrowseInputFile1)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(BrowseOutputFile1)))
-                .addGap(10, 10, 10)
+                        .addGap(33, 33, 33)
+                        .addGroup(FileInfoPane1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(OutputFileField_Sym1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(BrowseOutputFile1))))
+                .addGap(18, 18, 18)
                 .addGroup(FileInfoPane1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(FileInfoPane1Layout.createSequentialGroup()
-                        .addGap(17, 17, 17)
-                        .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 52, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE)))
-                .addContainerGap())
+                    .addComponent(SignButton, javax.swing.GroupLayout.PREFERRED_SIZE, 52, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 52, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(26, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout DecryptTabLayout = new javax.swing.GroupLayout(DecryptTab);
@@ -1538,23 +1082,24 @@ public class UserManager_GUI extends javax.swing.JFrame {
         DecryptTabLayout.setHorizontalGroup(
             DecryptTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(DecryptTabLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(DecryptTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(KeyInfoPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(FileInfoPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(363, Short.MAX_VALUE))
+                .addComponent(KeyInfoPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 76, Short.MAX_VALUE))
+            .addGroup(DecryptTabLayout.createSequentialGroup()
+                .addGap(170, 170, 170)
+                .addComponent(FileInfoPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         DecryptTabLayout.setVerticalGroup(
             DecryptTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(DecryptTabLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(KeyInfoPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(FileInfoPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 262, Short.MAX_VALUE)
-                .addGap(29, 29, 29))
+                .addGap(18, 18, 18)
+                .addComponent(FileInfoPane1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(22, 22, 22))
         );
 
-        TabbedPane.addTab("Decryptor", DecryptTab);
+        TabbedPane.addTab("Decryptor - Signer", DecryptTab);
 
         Help.setText("Help");
         MenuBar.add(Help);
@@ -1575,9 +1120,9 @@ public class UserManager_GUI extends javax.swing.JFrame {
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(TabbedPane, javax.swing.GroupLayout.DEFAULT_SIZE, 540, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addGap(0, 13, Short.MAX_VALUE)
+                .addComponent(TabbedPane, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
         TabbedPane.getAccessibleContext().setAccessibleName("Users");
@@ -1585,92 +1130,236 @@ public class UserManager_GUI extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void AddUserButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_AddUserButtonActionPerformed
-        // TODO add your handling code here: 
-            CreateAccount_GUI window = new CreateAccount_GUI();
-            window.show();      
-    }//GEN-LAST:event_AddUserButtonActionPerformed
-
     private void DeleteUserButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_DeleteUserButtonActionPerformed
         // TODO add your handling code here:
-            Delete_GUI window = new Delete_GUI();
-            window.show();
+
     }//GEN-LAST:event_DeleteUserButtonActionPerformed
 
     private void EditUserButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_EditUserButtonActionPerformed
         // TODO add your handling code here:
 
-            ModifyAccount_GUI window = new ModifyAccount_GUI();
-            window.show();
+//            ModifyAccount_GUI window = new ModifyAccount_GUI();
+//            window.show();
            
     }//GEN-LAST:event_EditUserButtonActionPerformed
 
-    private void RefreshButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_RefreshButtonActionPerformed
-        try {
-            // TODO add your handling code here:
-            this.GetData();
-        } catch (SAXException | IOException | ParserConfigurationException ex) {
-            Logger.getLogger(UserManager_GUI.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }//GEN-LAST:event_RefreshButtonActionPerformed
-
-    private void UserTableMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_UserTableMousePressed
-        // TODO add your handling code here:
-        if (SwingUtilities.isRightMouseButton(evt))
-            popUpMenu.show(this, evt.getX(), evt.getY());
-    }//GEN-LAST:event_UserTableMousePressed
-
     private void EditContactActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_EditContactActionPerformed
         // TODO add your handling code here:
-        ModifyAccount_GUI window = new ModifyAccount_GUI();
+        int index = this.UserTable.getSelectedRow();
+        TableModel model = this.UserTable.getModel();
+        String name = model.getValueAt(index, 0).toString();
+        String email = model.getValueAt(index, 1).toString();
+        String pub = model.getValueAt(index, 2).toString();
+        String dob = model.getValueAt(index, 3).toString();
+        String phone = model.getValueAt(index, 4).toString();
+        String add = model.getValueAt(index, 5).toString();
+        ModifyUser_GUI window = new ModifyUser_GUI(this.pathdir,name, email, pub, dob, phone, add);
         window.setVisible(true);
     }//GEN-LAST:event_EditContactActionPerformed
 
-    private void KeySizeBox_SymActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_KeySizeBox_SymActionPerformed
+    private void DeleteContactActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_DeleteContactActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_KeySizeBox_SymActionPerformed
+        int index = this.UserTable.getSelectedRow();
+        TableModel model = this.UserTable.getModel();
+        String email = model.getValueAt(index, 1).toString();
+        User user = new User();
+        try {
+            user.Delete(this.pathdir, email);
+            this.GetData(pathdir);
+        } catch (SAXException ex) {
+            Logger.getLogger(UserManager_GUI.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(UserManager_GUI.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ParserConfigurationException ex) {
+            Logger.getLogger(UserManager_GUI.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (TransformerException ex) {
+            Logger.getLogger(UserManager_GUI.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_DeleteContactActionPerformed
 
-    private void ExportPublicKeyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ExportPublicKeyActionPerformed
+    private void ExportContactInfoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ExportContactInfoActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_ExportPublicKeyActionPerformed
+        int index = this.UserTable.getSelectedRow();
+        TableModel model = this.UserTable.getModel();
+        String email = model.getValueAt(index, 1).toString();
+        
+        User user = new User();
+        try {
+            user.ExportInf(email, this.pathdir + "\\Database.xml");
+        } catch (SAXException ex) {
+            Logger.getLogger(UserManager_GUI.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(UserManager_GUI.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ParserConfigurationException ex) {
+            Logger.getLogger(UserManager_GUI.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (TransformerException ex) {
+            Logger.getLogger(UserManager_GUI.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_ExportContactInfoActionPerformed
 
-    private void OutputFileFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_OutputFileFieldActionPerformed
+    private void SignButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SignButtonActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_OutputFileFieldActionPerformed
+        try
+        {
+            //Thuat toan dc set cung o day la SHA-256
+            String hashAlgo = "SHA-256";
+            if("".equals(InputFileField_Sym1.getText()))
+            {
+                //CommandLine.append("Invalid input....");
+                JOptionPane.showMessageDialog(null, "Invalid input...", "ERROR!", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            if(mainPrivateKey == null)
+            {
+                //CommandLine.append("\nError: Empty private key!\nPlease import private key!");
+                JOptionPane.showMessageDialog(null, "Empty private key!\\nPlease import private key!", "ERROR!", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            OutputFileField_Sym1.setText(InputFileField_Sym1.getText().concat(".sig"));
+
+            //SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+            //long startTime = System.currentTimeMillis();
+            //CommandLine.append("\n" + sdf.format(startTime) + " - Begin signing file...");
+            boolean result = false;
+
+            String hashString = DCrypto.digestFile(InputFileField_Sym1.getText(), hashAlgo);
+            System.out.println("\nHash String: " + hashString);
+            String signature = DCrypto.signMess(mainPrivateKey, hashString);
+            System.out.println("\nSignature created: " + signature);
+
+            if("".equals(hashString) || "".equals(signature))
+            {
+                long endTime = System.currentTimeMillis();
+                //CommandLine.append("\n" + sdf.format(endTime) + " - Signing failed...");
+                JOptionPane.showMessageDialog(null, "Signing failed...", "ERROR!", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            File signatureFile = new File(OutputFileField_Sym1.getText());
+            signatureFile.createNewFile();
+            PrintWriter writer = new PrintWriter(signatureFile);
+            writer.println(signature);
+            writer.close();
+
+            //CommandLine.append("\nSignature file " + OutputFileField.getText() + " has been created.");
+            //long endTime = System.currentTimeMillis();
+            //CommandLine.append("\n" + sdf.format(endTime) + " - Signing completed.");
+            JOptionPane.showMessageDialog(null, "Signature file " + OutputFileField_Sym1.getText() + " has been created.", "Completed!", JOptionPane.INFORMATION_MESSAGE);
+        }
+        catch (IOException ex)
+        {
+            Logger.getLogger(UserManager_GUI.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_SignButtonActionPerformed
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        try {
+            // TODO add your handling code here:
+            String cipherFile = InputFileField_Sym1.getText();
+            String plainFile = OutputFileField_Sym1.getText();
+            DCrypto.symDecryptFileAdvanced(mainPrivateKey, cipherFile, plainFile);
+        }
+        catch (IOException ex)
+        {
+            Logger.getLogger(UserManager_GUI.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_jButton2ActionPerformed
+
+    private void BrowseOutputFile1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BrowseOutputFile1ActionPerformed
+        // TODO add your handling code here:
+        //Handle open button action.
+        if (evt.getSource() == BrowseOutputFile1)
+        {
+            JFileChooser fc = new JFileChooser();
+            int returnVal = fc.showOpenDialog(UserManager_GUI.this);
+
+            if (returnVal == fc.APPROVE_OPTION)
+            {
+                File file = fc.getSelectedFile();
+                OutputFileField_Sym1.setText(file.getPath());
+            }
+            else
+            {
+
+            }
+        }
+    }//GEN-LAST:event_BrowseOutputFile1ActionPerformed
+
+    private void BrowseInputFile1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BrowseInputFile1ActionPerformed
+        // TODO add your handling code here:
+        //Handle open button action.
+        if (evt.getSource() == BrowseInputFile1)
+        {
+            JFileChooser fc = new JFileChooser();
+            int returnVal = fc.showOpenDialog(UserManager_GUI.this);
+
+            if (returnVal == fc.APPROVE_OPTION)
+            {
+                File file = fc.getSelectedFile();
+                InputFileField_Sym1.setText(file.getPath());
+            }
+            else
+            {
+
+            }
+        }
+    }//GEN-LAST:event_BrowseInputFile1ActionPerformed
+
+    private void InputFileField_Sym1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_InputFileField_Sym1ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_InputFileField_Sym1ActionPerformed
+
+    private void OutputFileField_Sym1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_OutputFileField_Sym1ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_OutputFileField_Sym1ActionPerformed
+
+    private void LoadYourPrivateKeyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_LoadYourPrivateKeyActionPerformed
+        // TODO add your handling code here:
+        if(mainPrivateKey != null)
+        CommandLine_Sym1.setText(DCrypto.keyToString(mainPrivateKey));
+        else
+        JOptionPane.showMessageDialog(null, "Please create your keypair first!", "ERROR!", JOptionPane.ERROR_MESSAGE);
+    }//GEN-LAST:event_LoadYourPrivateKeyActionPerformed
 
     private void VerifyButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_VerifyButtonActionPerformed
         try
         {
             // TODO add your handling code here:
-            if("".equals(InputFileField.getText()))
+            if("".equals(InputFileField_Sym.getText()))
             {
-                CommandLine.append("Invalid input....");
+                //CommandLine.append("Invalid input....");
+                JOptionPane.showMessageDialog(null, "Invalid input...", "ERROR!", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
             //DCrypto.DCrypto.class.
             if(mainPublicKey == null)
             {
-                CommandLine.append("\nError: Empty public key!\nPlease import public key!");
+                //CommandLine.append("\nError: Empty public key!\nPlease import public key!");
+                JOptionPane.showMessageDialog(null, "Empty public key!\nPlease import public key!", "ERROR!", JOptionPane.ERROR_MESSAGE);
                 return;
             }
-            String originFile = InputFileField.getText();
+            String originFile = InputFileField_Sym.getText();
             String signatureFile = originFile + ".sig";
-            OutputFileField.setText(signatureFile);
+            OutputFileField_Sym.setText(signatureFile);
             File testFile = new File(signatureFile);
             if(testFile.exists())
             {
-                CommandLine.append("\nChecked. Signature file exist.");
+                //CommandLine.append("\nChecked. Signature file exist.");
+                //JOptionPane.showMessageDialog(null, "Checked. Signature file exist.", "ERROR!", JOptionPane.ERROR_MESSAGE);
+                System.out.println("\nChecked. Signature file exist.");
             }
             else
             {
-                CommandLine.append("\nSignature file does not exist.");
+                //CommandLine.append("\nSignature file does not exist.");
+                //JOptionPane.showMessageDialog(null, "Checked. Signature file does not exist.", "ERROR!", JOptionPane.ERROR_MESSAGE);
+                System.out.println("\nChecked. Signature file does not exist.");
                 return;
             }
 
-            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
-            long startTime = System.currentTimeMillis();
-            CommandLine.append("\n" + sdf.format(startTime) + " - Begin verifying file...");
+            //SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+            //long startTime = System.currentTimeMillis();
+            //CommandLine.append("\n" + sdf.format(startTime) + " - Begin verifying file...");
             boolean result = false;
 
             String signature = "";
@@ -1688,12 +1377,15 @@ public class UserManager_GUI extends javax.swing.JFrame {
 
             result = DCrypto.verifySign(mainPublicKey, originFile, signature);
 
-            long endTime = System.currentTimeMillis();
+            //long endTime = System.currentTimeMillis();
 
             if(result == true)
-            CommandLine.append("\n" + sdf.format(endTime) +" Signatured verified! ^^");
+            //CommandLine.append("\n" + sdf.format(endTime) +" Signatured verified! ^^");
+            JOptionPane.showMessageDialog(null, "Signatured verified! ^^", "Verified!", JOptionPane.INFORMATION_MESSAGE);
             else
-            CommandLine.append("\n" + sdf.format(endTime) +" Signature doesn't match....");
+            //CommandLine.append("\n" + sdf.format(endTime) +" Signature doesn't match....");
+            JOptionPane.showMessageDialog(null, "Signature doesn't match....", "Failed...", JOptionPane.INFORMATION_MESSAGE);
+
         }
         catch (IOException ex)
         {
@@ -1701,320 +1393,36 @@ public class UserManager_GUI extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_VerifyButtonActionPerformed
 
-    private void ExportPublicActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ExportPublicActionPerformed
-        // TODO add your handling code here:
-        if (evt.getSource() == ExportPublic)
-        {
-            JFileChooser fc = new JFileChooser();
-            if(mainPublicKey == null)
-            {
-                CommandLine.append("\nPlease create public key first!!!!\n");
-                return;
-            }
-            int returnVal = fc.showSaveDialog(UserManager_GUI.this);
-
-            if (returnVal == JFileChooser.APPROVE_OPTION)
-            {
-                DCrypto.exportPublicKey(mainPublicKey, fc.getSelectedFile().getPath());
-                CommandLine.append("\nExported public key\n");
-            }
-            else
-            {
-
-            }
-        }
-    }//GEN-LAST:event_ExportPublicActionPerformed
-
     private void EncryptButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_EncryptButtonActionPerformed
+        // TODO add your handling code here:
+        String algo = (String) SymAlgoComboBox.getSelectedItem();
+        //Do muon mo rong key size len 256 thi phai add them policy, kha mat cong nen thoi, default la 128
+        //String sessionKeySize = (String) SessionKeyComboBox.getSelectedItem();
+        String sessionKeySize = "128";
+        String mode = (String) ModOpComboBox.getSelectedItem();
+        String padMode = (String) PadSchemeComboBox.getSelectedItem();
+        String plainFile = InputFileField_Sym.getText();
+        String cipherFile = OutputFileField_Sym.getText();
+        String publicKeyString = PublicKeyTextArea.getText();
 
-        try {
-            if("".equals(InputFileField.getText()) || "".equals(OutputFileField.getText()))
-            {
-                CommandLine.append("\nInvalid input....");
-                return;
-            }
-            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
-            long startTime = System.currentTimeMillis();
-            CommandLine.append("\n" + sdf.format(startTime) + " - Begin encrypting file...");
-            boolean result = false;
-            result = DCrypto.RSAEncryptFile(mainPublicKey, InputFileField.getText(), OutputFileField.getText());
-            long endTime = System.currentTimeMillis();
-            if(result == true)
-                CommandLine.append("\n" + sdf.format(endTime) + " - Encryption completed. ^^");
-            else
-                CommandLine.append("\n" + sdf.format(endTime) + " - Encryption failed...");
-        } 
-        catch (IOException ex) 
+        if(publicKeyString == null)
         {
-            Logger.getLogger(UserManager_GUI.class.getName()).log(Level.SEVERE, null, ex);
+            JOptionPane.showMessageDialog(null, "Public key is null!!", "ERROR!", JOptionPane.ERROR_MESSAGE);
+            return;
         }
-        
 
+        //boolean result = DCrypto.symEncryptFileAdvanced(mainPublicKey, algo, sessionKeySize, mode, padMode, plainFile, cipherFile);
+        boolean result = DCrypto.symEncryptFileAdvanced(DCrypto.stringToPubKey(publicKeyString), algo, sessionKeySize, mode, padMode, plainFile, cipherFile);
+
+        if (result == false)
+        {
+
+        }
     }//GEN-LAST:event_EncryptButtonActionPerformed
 
-    private void DecryptButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_DecryptButtonActionPerformed
+    private void PadSchemeComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_PadSchemeComboBoxActionPerformed
         // TODO add your handling code here:
-        if("".equals(InputFileField.getText()) || "".equals(OutputFileField.getText()))
-        {
-            CommandLine.append("Invalid input....");
-            return;
-        }
-        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
-        long startTime = System.currentTimeMillis();
-        CommandLine.append("\n" + sdf.format(startTime) + " - Begin decrypting file...");
-        boolean result = false;
-        result = DCrypto.RSADecryptFile(mainPrivateKey, InputFileField.getText(), OutputFileField.getText());
-        long endTime = System.currentTimeMillis();
-        if(result == true)
-        CommandLine.append("\n" + sdf.format(endTime) + " - Decryption completed. ^^");
-        else
-        CommandLine.append("\n" + sdf.format(endTime) + " - Decryption failed...");
-    }//GEN-LAST:event_DecryptButtonActionPerformed
-
-    private void KeySizeBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_KeySizeBoxActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_KeySizeBoxActionPerformed
-
-    private void ExportPrivateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ExportPrivateActionPerformed
-        // TODO add your handling code here:
-        if (evt.getSource() == ExportPrivate)
-        {
-            JFileChooser fc = new JFileChooser();
-            if(mainPrivateKey == null)
-            {
-                CommandLine.append("\nPlease create private key first!!!!\n");
-                return;
-            }
-            int returnVal = fc.showSaveDialog(UserManager_GUI.this);
-
-            if (returnVal == JFileChooser.APPROVE_OPTION)
-            {
-                DCrypto.exportPrivateKey(mainPrivateKey, fc.getSelectedFile().getPath());
-                CommandLine.append("\nExported private key\n");
-            }
-            else
-            {
-
-            }
-        }
-    }//GEN-LAST:event_ExportPrivateActionPerformed
-
-    private void ImportPublicKeyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ImportPublicKeyActionPerformed
-        // TODO add your handling code here:
-        if (evt.getSource() == ImportPublicKey)
-        {
-            JFileChooser fc = new JFileChooser();
-            int returnVal = fc.showOpenDialog(UserManager_GUI.this);
-
-            if (returnVal == JFileChooser.APPROVE_OPTION) {
-                File file = fc.getSelectedFile();
-                mainPublicKey = DCrypto.importPublicKey(file.getPath());
-                CommandLine.append("\n=====Imported public key=====");
-                CommandLine.append("\n" + DCrypto.keyToString(mainPublicKey));
-                CommandLine.append("\n=======End public key========");
-            }
-            else
-            {
-                //chua dien
-            }
-        }
-    }//GEN-LAST:event_ImportPublicKeyActionPerformed
-
-    private void InputFileFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_InputFileFieldActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_InputFileFieldActionPerformed
-
-    private void ImportPrivateKeyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ImportPrivateKeyActionPerformed
-        // TODO add your handling code here:
-        if (evt.getSource() == ImportPrivateKey)
-        {
-            JFileChooser fc = new JFileChooser();
-            int returnVal = fc.showOpenDialog(UserManager_GUI.this);
-
-            if (returnVal == JFileChooser.APPROVE_OPTION) {
-                File file = fc.getSelectedFile();
-                mainPrivateKey = DCrypto.importPrivateKey(file.getPath());
-                CommandLine.append("\n=====Imported private key=====");
-                CommandLine.append("\n" + DCrypto.keyToString(mainPrivateKey));
-                CommandLine.append("\n=======End private key========");
-            }
-            else
-            {
-
-            }
-        }
-    }//GEN-LAST:event_ImportPrivateKeyActionPerformed
-
-    private void FileButton_1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_FileButton_1ActionPerformed
-        // TODO add your handling code here:
-        //Handle open button action.
-        if (evt.getSource() == FileButton_1)
-        {
-            JFileChooser fc = new JFileChooser();
-            int returnVal = fc.showOpenDialog(UserManager_GUI.this);
-
-            if (returnVal == fc.APPROVE_OPTION) {
-                File file = fc.getSelectedFile();
-                InputFileField.setText(file.getPath());
-            }
-            else
-            {
-
-            }
-        }
-    }//GEN-LAST:event_FileButton_1ActionPerformed
-
-    private void CreateKeyPairButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_CreateKeyPairButtonActionPerformed
-        // TODO add your handling code here:
-        if(KeySizeBox.getText().equals(""))
-        {
-            CommandLine.append("\nError: Empty keysize!!!!\n");
-            return;
-        }
-        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
-        int keySize = Integer.parseInt(KeySizeBox.getText());
-
-        if(keySize < 768 || keySize > 16384)
-        {
-            CommandLine.append("\nInvalid key size! Key size must be between 768 and 16384 bits");
-            return;
-        }
-        if(keySize % 8 != 0)
-        {
-            CommandLine.append("\nKey size must divisible by 8!!!");
-            return;
-        }
-
-        long startTime = System.currentTimeMillis();
-        CommandLine.append("\nGenerating RSA Key Pair at " + sdf.format(startTime));
-
-        KeyPair keyPair = DCrypto.createRSAKeyPair(keySize);
-        mainPublicKey = keyPair.getPublic();
-        mainPrivateKey = keyPair.getPrivate();
-
-        long endTime = System.currentTimeMillis();
-        CommandLine.append("\nFinished at " + sdf.format(endTime));
-        CommandLine.append("\n=========Public key==========\n" + DCrypto.keyToString(mainPublicKey) );
-        CommandLine.append("\n========End public key=======");
-        CommandLine.append("\n\n=========Private key=========\n" + DCrypto.keyToString(mainPrivateKey) );
-        CommandLine.append("\n========End private key======");
-    }//GEN-LAST:event_CreateKeyPairButtonActionPerformed
-
-    private void FileButton_2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_FileButton_2ActionPerformed
-        // TODO add your handling code here:
-        //Handle open button action.
-        if (evt.getSource() == FileButton_2)
-        {
-            JFileChooser fc = new JFileChooser();
-            int returnVal = fc.showSaveDialog(UserManager_GUI.this);
-
-            if (returnVal == JFileChooser.APPROVE_OPTION) 
-            {
-                File file = fc.getSelectedFile();
-                OutputFileField.setText(file.getPath());
-            }
-            else
-            {
-
-            }
-        }
-    }//GEN-LAST:event_FileButton_2ActionPerformed
-
-    private void SignButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SignButtonActionPerformed
-        // TODO add your handling code here:
-        try
-        {
-            String algorithm = "SHA-256";
-            if("".equals(InputFileField.getText()))
-            {
-                CommandLine.append("Invalid input....");
-                return;
-            }
-            if(mainPrivateKey == null)
-            {
-                CommandLine.append("\nError: Empty private key!\nPlease import private key!");
-                return;
-            }
-            OutputFileField.setText(InputFileField.getText().concat(".sig"));
-
-            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
-            long startTime = System.currentTimeMillis();
-            CommandLine.append("\n" + sdf.format(startTime) + " - Begin signing file...");
-            boolean result = false;
-
-            String hashString = DCrypto.digestFile(InputFileField.getText(), algorithm);
-            CommandLine.append("\nHash String: " + hashString);
-            String signature = DCrypto.signMess(mainPrivateKey, hashString);
-            CommandLine.append("\nSignature created: " + signature);
-
-            if("".equals(hashString) || "".equals(signature))
-            {
-                long endTime = System.currentTimeMillis();
-                CommandLine.append("\n" + sdf.format(endTime) + " - Signing failed...");
-                return;
-            }
-
-            File signatureFile = new File(OutputFileField.getText());
-            signatureFile.createNewFile();
-            PrintWriter writer = new PrintWriter(signatureFile);
-            writer.println(signature);
-            writer.close();
-
-            CommandLine.append("\nSignature file " + OutputFileField.getText() + " has been created.");
-            long endTime = System.currentTimeMillis();
-            CommandLine.append("\n" + sdf.format(endTime) + " - Signing completed.");
-        }
-        catch (IOException ex)
-        {
-            Logger.getLogger(UserManager_GUI.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }//GEN-LAST:event_SignButtonActionPerformed
-
-    private void EncryptWithPublicKeyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_EncryptWithPublicKeyActionPerformed
-        // TODO add your handling code here:
-        //Show tab encrypt voi public key len
-        //1. Tao session key - Cho phep nguoi dung chon thuat toan, keysize
-        
-    }//GEN-LAST:event_EncryptWithPublicKeyActionPerformed
-
-    private void ExportPrivate1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ExportPrivate1ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_ExportPrivate1ActionPerformed
-
-    private void CreateKeyPairButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_CreateKeyPairButton1ActionPerformed
-        // TODO add your handling code here:
-        PublicKeyArea.setText("");
-        PrivateKeyArea.setText("");
-        int keySize = Integer.parseInt(KeySizeComboBox1.getSelectedItem().toString());
-
-        KeyPair keyPair = DCrypto.createRSAKeyPair(keySize);
-        mainPublicKey = keyPair.getPublic();
-        mainPrivateKey = keyPair.getPrivate();
-
-        PublicKeyArea.append("=========Public key==========\n" + DCrypto.keyToString(mainPublicKey) );
-        PublicKeyArea.append("\n========End public key=======");
-        PrivateKeyArea.append("=========Private key=========\n" + DCrypto.keyToString(mainPrivateKey) );
-        PrivateKeyArea.append("\n========End private key======");
-    }//GEN-LAST:event_CreateKeyPairButton1ActionPerformed
-
-    private void KeySizeComboBox1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_KeySizeComboBox1ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_KeySizeComboBox1ActionPerformed
-
-    private void NameFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NameFieldActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_NameFieldActionPerformed
-
-    private void LoginButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_LoginButtonActionPerformed
-        // TODO add your handling code here:
-        
-    }//GEN-LAST:event_LoginButtonActionPerformed
-
-    private void CreateAccountButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_CreateAccountButtonActionPerformed
-        // TODO add your handling code here:
-        //Users.GUI.CreateAccount_GUI createAccountWindow = new Users.GUI.CreateAccount_GUI();
-        //createAccountWindow.
-    }//GEN-LAST:event_CreateAccountButtonActionPerformed
+    }//GEN-LAST:event_PadSchemeComboBoxActionPerformed
 
     private void BrowseOutputFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BrowseOutputFileActionPerformed
         // TODO add your handling code here:
@@ -2024,7 +1432,7 @@ public class UserManager_GUI extends javax.swing.JFrame {
             JFileChooser fc = new JFileChooser();
             int returnVal = fc.showOpenDialog(UserManager_GUI.this);
 
-            if (returnVal == fc.APPROVE_OPTION) 
+            if (returnVal == fc.APPROVE_OPTION)
             {
                 File file = fc.getSelectedFile();
                 OutputFileField_Sym.setText(file.getPath());
@@ -2044,7 +1452,7 @@ public class UserManager_GUI extends javax.swing.JFrame {
             JFileChooser fc = new JFileChooser();
             int returnVal = fc.showOpenDialog(UserManager_GUI.this);
 
-            if (returnVal == fc.APPROVE_OPTION) 
+            if (returnVal == fc.APPROVE_OPTION)
             {
                 File file = fc.getSelectedFile();
                 InputFileField_Sym.setText(file.getPath());
@@ -2064,198 +1472,253 @@ public class UserManager_GUI extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_OutputFileField_SymActionPerformed
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        // TODO add your handling code here:
-        String algo = (String) SymAlgoComboBox.getSelectedItem();
-        String sessionKeySize = (String) SessionKeyComboBox.getSelectedItem();
-        String mode = (String) ModOpComboBox.getSelectedItem();
-        String padMode = (String) PadSchemeComboBox.getSelectedItem();
-        String plainFile = InputFileField_Sym.getText();
-        String cipherFile = OutputFileField_Sym.getText();
-        
-        boolean result = DCrypto.symEncryptFileAdvanced(mainPublicKey, algo, sessionKeySize, mode, padMode, plainFile, cipherFile);
-        
-        if (result == false)
+    private void RefreshButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_RefreshButtonActionPerformed
+        try
         {
-            
-        }
-    }//GEN-LAST:event_jButton1ActionPerformed
-
-    private void KeySizeBox_Sym1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_KeySizeBox_Sym1ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_KeySizeBox_Sym1ActionPerformed
-
-    private void ExportPublicKey1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ExportPublicKey1ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_ExportPublicKey1ActionPerformed
-
-    private void OutputFileField_Sym1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_OutputFileField_Sym1ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_OutputFileField_Sym1ActionPerformed
-
-    private void InputFileField_Sym1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_InputFileField_Sym1ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_InputFileField_Sym1ActionPerformed
-
-    private void BrowseInputFile1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BrowseInputFile1ActionPerformed
-        // TODO add your handling code here:
-        //Handle open button action.
-        if (evt.getSource() == BrowseInputFile1)
-        {
-            JFileChooser fc = new JFileChooser();
-            int returnVal = fc.showOpenDialog(UserManager_GUI.this);
-
-            if (returnVal == fc.APPROVE_OPTION) 
-            {
-                File file = fc.getSelectedFile();
-                InputFileField_Sym1.setText(file.getPath());
-            }
-            else
-            {
-
-            }
-        }
-    }//GEN-LAST:event_BrowseInputFile1ActionPerformed
-
-    private void BrowseOutputFile1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BrowseOutputFile1ActionPerformed
-        // TODO add your handling code here:
-        //Handle open button action.
-        if (evt.getSource() == BrowseOutputFile1)
-        {
-            JFileChooser fc = new JFileChooser();
-            int returnVal = fc.showOpenDialog(UserManager_GUI.this);
-
-            if (returnVal == fc.APPROVE_OPTION) 
-            {
-                File file = fc.getSelectedFile();
-                OutputFileField_Sym1.setText(file.getPath());
-            }
-            else
-            {
-
-            }
-        }
-    }//GEN-LAST:event_BrowseOutputFile1ActionPerformed
-
-    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        try {
             // TODO add your handling code here:
-            String cipherFile = InputFileField_Sym1.getText();
-            String plainFile = OutputFileField_Sym1.getText();
-            DCrypto.symDecryptFileAdvanced(mainPrivateKey, cipherFile, plainFile);
+            this.GetData(this.pathdir);
         }
-        catch (IOException ex) {
+        catch (SAXException | IOException | ParserConfigurationException ex) {
             Logger.getLogger(UserManager_GUI.class.getName()).log(Level.SEVERE, null, ex);
         }
-    }//GEN-LAST:event_jButton2ActionPerformed
+    }//GEN-LAST:event_RefreshButtonActionPerformed
 
-    private void jComboBox5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBox5ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jComboBox5ActionPerformed
-
-    private void ImportPublicKey1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ImportPublicKey1ActionPerformed
-        // TODO add your handling code here:
-        if (evt.getSource() == ImportPublicKey1)
+    private void AddContactButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_AddContactButtonActionPerformed
+        try
         {
-            JFileChooser fc = new JFileChooser();
-            int returnVal = fc.showOpenDialog(UserManager_GUI.this);
-
-            if (returnVal == JFileChooser.APPROVE_OPTION) {
-                File file = fc.getSelectedFile();
-                mainPublicKey = DCrypto.importPublicKey(file.getPath());
-                PublicKeyTextArea.append("\n=====Imported public key=====");
-                PublicKeyTextArea.append("\n" + DCrypto.keyToString(mainPublicKey));
-                PublicKeyTextArea.append("\n=======End public key========");
-            }
-            else
-            {
-                //chua dien
-            }
+            // TODO add your handling code here:
+            AddContact_GUI window = new AddContact_GUI(this.pathdir);
+            window.setLocationRelativeTo(null);
+            window.setVisible(true);
+            this.GetData(this.pathdir);
         }
-    }//GEN-LAST:event_ImportPublicKey1ActionPerformed
+        catch (SAXException | IOException | ParserConfigurationException ex) {
+            Logger.getLogger(UserManager_GUI.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_AddContactButtonActionPerformed
 
-    private void PadSchemeComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_PadSchemeComboBoxActionPerformed
+    private void UserTableMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_UserTableMousePressed
         // TODO add your handling code here:
-    }//GEN-LAST:event_PadSchemeComboBoxActionPerformed
-
-    private void ImportPrivateKey1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ImportPrivateKey1ActionPerformed
-        // TODO add your handling code here:
-        if (evt.getSource() == ImportPrivateKey1)
+        if (SwingUtilities.isRightMouseButton(evt))
         {
-            JFileChooser fc = new JFileChooser();
-            int returnVal = fc.showOpenDialog(UserManager_GUI.this);
+            JTable source = (JTable)evt.getSource();
+            int row = source.rowAtPoint( evt.getPoint() );
+            //if (! source.isRowSelected(row))
+            //source.changeSelection(row, column, false, false);
 
-            if (returnVal == JFileChooser.APPROVE_OPTION) {
-                File file = fc.getSelectedFile();
-                mainPrivateKey = DCrypto.importPrivateKey(file.getPath());
-                CommandLine_Sym1.append("\n=====Imported private key=====");
-                CommandLine_Sym1.append("\n" + DCrypto.keyToString(mainPrivateKey));
-                CommandLine_Sym1.append("\n=======End private key========");
-            }
-            else
-            {
-
-            }
+            //Lay columm 2, cot public key
+            tempPubKey = (String) UserTable.getModel().getValueAt(row,2);
+            //Columm cot 1 la email
+            tempEmail = (String) UserTable.getModel().getValueAt(row,1);
+            popUpMenu.show(this, evt.getX(), evt.getY());
         }
-    }//GEN-LAST:event_ImportPrivateKey1ActionPerformed
+    }//GEN-LAST:event_UserTableMousePressed
+
+    private void UserTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_UserTableMouseClicked
+        // TODO add your handling code here:
+    }//GEN-LAST:event_UserTableMouseClicked
+
+    private void SaveKeyPairToAccountActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SaveKeyPairToAccountActionPerformed
+        try
+        {
+            // TODO add your handling code here:
+            if(PublicKeyArea.getText().equals("") || PrivateKeyArea.getText().equals(""))
+            {
+                JOptionPane.showMessageDialog(null, "Please create your keypair first!", "ERROR!", JOptionPane.ERROR_MESSAGE);
+            }
+
+            mainPublicKey = DCrypto.stringToPubKey(PublicKeyArea.getText());
+            mainPrivateKey = DCrypto.stringToPrivateKey(PrivateKeyArea.getText());
+            mainKeyPair = new KeyPair(mainPublicKey,mainPrivateKey);
+
+            //Lay thong tin cap khoa cua account nguoi dung
+            RSAPublicKey tempPublicKey = (RSAPublicKey) mainPublicKey;
+            KeySizeField1.setText(String.valueOf(tempPublicKey.getModulus().bitLength()));
+            AlgorithmField1.setText(tempPublicKey.getAlgorithm());
+
+            //Update thong tin private key cua user
+            CommandLine_Sym1.setText(PrivateKeyArea.getText());
+            KeyOwnerField1.setText(EmailTextField.getText());
+
+            User user = new User();
+            user.UpdateKey(EmailTextField.getText(),PublicKeyArea.getText(), PrivateKeyArea.getText());
+            JOptionPane.showMessageDialog(null, "Your keypair has been saved!", "Updated", JOptionPane.INFORMATION_MESSAGE);
+        }
+        catch (SAXException | IOException | ParserConfigurationException | TransformerException ex)
+        {
+            Logger.getLogger(UserManager_GUI.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_SaveKeyPairToAccountActionPerformed
+
+    private void CreateKeyPairButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_CreateKeyPairButton1ActionPerformed
+        // TODO add your handling code here:
+        PublicKeyArea.setText("");
+        PrivateKeyArea.setText("");
+        int keySize = Integer.parseInt(KeySizeComboBox1.getSelectedItem().toString());
+
+        KeyPair keyPair = DCrypto.createRSAKeyPair(keySize);
+        PublicKeyArea.append(DCrypto.keyToString(keyPair.getPublic()));
+        PrivateKeyArea.append(DCrypto.keyToString(keyPair.getPrivate()));
+    }//GEN-LAST:event_CreateKeyPairButton1ActionPerformed
+
+    private void KeySizeComboBox1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_KeySizeComboBox1ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_KeySizeComboBox1ActionPerformed
+
+    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
+        // TODO add your handling code here:
+        this.SetInf(this.pathdir);
+    }//GEN-LAST:event_jButton3ActionPerformed
+
+    private void EmailTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_EmailTextFieldActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_EmailTextFieldActionPerformed
+
+    private void NameFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NameFieldActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_NameFieldActionPerformed
+
+    private void UpdateAccButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_UpdateAccButtonActionPerformed
+        // TODO add your handling code here:
+        Passphrase_GUI window = new Passphrase_GUI (this.EmailTextField.getText(), this.NameField.getText(), this.DoBTextField.getText(), this.PhoneTextField.getText(), this.AddrTextField.getText());
+        window.setLocationRelativeTo(null);
+        window.setVisible(true);
+    }//GEN-LAST:event_UpdateAccButtonActionPerformed
+
+    private void ExportInfoButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ExportInfoButtonActionPerformed
+        // TODO add your handling code here:
+        String temp = this.EmailTextField.getText();
+        JOptionPane.showMessageDialog(null, "Your account info has been exported.", "Exported", JOptionPane.PLAIN_MESSAGE);
+        User user = new User();
+        try
+        {
+            user.ExportInf(temp, temp + "\\UserInfo.xml");
+        } catch (SAXException | IOException | ParserConfigurationException | TransformerException ex) {
+            Logger.getLogger(UserManager_GUI.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_ExportInfoButtonActionPerformed
 
     /**
      * @param args the command line arguments
      */
-    public void GetData() throws SAXException, IOException, ParserConfigurationException
-    {
-        Vector header = new Vector();
-        header.addElement("Email"); 
-        header.addElement("Name"); 
-        header.addElement("Date Of Birth"); 
-        header.addElement("Phone"); 
-        header.addElement("Address");
-        DefaultTableModel model = new DefaultTableModel(header, 0); 
-        UserTable.setModel(model); 
+    public void GetData(String pathdir) throws SAXException, IOException, ParserConfigurationException
+    { 
+        File file = new File(pathdir + "\\Database.xml"); 
+        
+        if (file.exists())
+        {
+            Vector header = new Vector();
+            header.addElement("Name"); 
+            header.addElement("Email"); 
+            header.addElement("Public Key");
+            header.addElement("Date Of Birth"); 
+            header.addElement("Phone"); 
+            header.addElement("Address");
+            DefaultTableModel model = new DefaultTableModel(header, 0); 
+            UserTable.setModel(model);
+            //Create instance of DocumentBuilderFactory 
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance(); 
+            //Get the DocumentBuilder 
+            DocumentBuilder docBuilder = factory.newDocumentBuilder(); 
+            //Using existing XML Document 
+            Document doc = docBuilder.parse(file); 
 
+            Element rootNode = doc.getDocumentElement(); 
 
-        File file = new File("Database.xml"); 
-        //Create instance of DocumentBuilderFactory 
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance(); 
-        //Get the DocumentBuilder 
-        DocumentBuilder docBuilder = factory.newDocumentBuilder(); 
-        //Using existing XML Document 
-        Document doc = docBuilder.parse(file); 
+            NodeList list = rootNode.getElementsByTagName("User"); 
 
-        Element rootNode = doc.getDocumentElement(); 
+            for (int i = 0; i < list.getLength(); i++) 
+            { 
 
-        NodeList list = rootNode.getElementsByTagName("User"); 
+                Vector row = new Vector();
+                Element sv = (Element) list.item(i); 
 
-        for (int i = 0; i < list.getLength(); i++) 
-        { 
+                Element id = (Element) sv.getElementsByTagName("Name").item(0); 
+                row.addElement(id.getTextContent()); 
 
-            Vector row = new Vector(); // Chỉ thêm dòng này. 
+                Element name = (Element) sv.getElementsByTagName("Email").item(0); 
+                row.addElement(name.getTextContent()); 
 
-            Element sv = (Element) list.item(i); 
+                Element pubkey = (Element) sv.getElementsByTagName("PublicKey").item(0); 
+                row.addElement(pubkey.getTextContent()); 
 
-            Element id = (Element) sv.getElementsByTagName("Email").item(0); 
-            row.addElement(id.getTextContent()); 
+                Element dateofbirth = (Element) sv.getElementsByTagName("DateOfBirth").item(0); 
+                row.addElement(dateofbirth.getTextContent()); 
 
-            Element name = (Element) sv.getElementsByTagName("Name").item(0); 
-            row.addElement(name.getTextContent()); 
+                Element phone = (Element) sv.getElementsByTagName("Phone").item(0); 
+                row.addElement(phone.getTextContent()); 
 
-            Element dateofbirth = (Element) sv.getElementsByTagName("DateOfBirth").item(0); 
-            row.addElement(dateofbirth.getTextContent()); 
+                Element add = (Element) sv.getElementsByTagName("Address").item(0); 
+                row.addElement(add.getTextContent()); 
 
-            Element phone = (Element) sv.getElementsByTagName("Phone").item(0); 
-            row.addElement(phone.getTextContent()); 
-            
-            Element add = (Element) sv.getElementsByTagName("Address").item(0); 
-            row.addElement(add.getTextContent()); 
-
-            model.addRow(row); 
-
-        } 
+                model.addRow(row); 
+            }
+        }
+        else
+        {
+            Vector header = new Vector();
+            header.addElement("Name"); 
+            header.addElement("Email"); 
+            header.addElement("Public Key");
+            header.addElement("Date Of Birth"); 
+            header.addElement("Phone"); 
+            header.addElement("Address");
+            DefaultTableModel model = new DefaultTableModel(header, 0); 
+            UserTable.setModel(model); 
+        }
     }
     
-    public void Refresh() throws SAXException, IOException, ParserConfigurationException
+    public void SetInf (String path)
     {
-       
+        try {
+            String filepath = path + "\\UserInfo.xml";
+            DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+            Document doc = docBuilder.parse(filepath);
+
+            Node Data = doc.getFirstChild();
+            NodeList nList = doc.getElementsByTagName("User");
+
+            for (int i = 0; i < nList.getLength(); i++) 
+            {
+                Node nNode = nList.item(i);
+
+                if (nNode.getNodeType() == Node.ELEMENT_NODE) 
+                {
+                    Element eElement = (Element) nNode;
+                    this.NameField.setText(eElement.getElementsByTagName("Name").item(0).getTextContent());
+                    this.EmailTextField.setText(eElement.getElementsByTagName("Email").item(0).getTextContent());
+                    this.DoBTextField.setText(eElement.getElementsByTagName("DateOfBirth").item(0).getTextContent());
+                    this.PhoneTextField.setText(eElement.getElementsByTagName("Phone").item(0).getTextContent());
+                    this.AddrTextField.setText(eElement.getElementsByTagName("Address").item(0).getTextContent());
+                    
+                    //Nap thong tin keypair cua account nay tu file len
+                    String tempStringPub, tempStringPrivate;
+                    tempStringPub = eElement.getElementsByTagName("PublicKey").item(0).getTextContent();
+                    tempStringPrivate = eElement.getElementsByTagName("PrivateKey").item(0).getTextContent();
+                    if(!tempStringPub.equals(""))
+                    {
+                        mainPublicKey = DCrypto.stringToPubKey(tempStringPub);
+                        PublicKeyArea.setText(tempStringPub);
+                    }
+                    if(!tempStringPrivate.equals(""))
+                    {
+                        mainPrivateKey = DCrypto.stringToPrivateKey(tempStringPrivate);
+                        PrivateKeyArea.setText(tempStringPrivate);
+                        //Lay thong tin cap khoa cua account nguoi dung
+                        RSAPrivateKey tempPrivateKey = (RSAPrivateKey) mainPrivateKey;
+                        KeySizeField1.setText(String.valueOf(tempPrivateKey.getModulus().bitLength()));
+                        AlgorithmField1.setText(tempPrivateKey.getAlgorithm());
+                        //Update thong tin private key cua user
+                        CommandLine_Sym1.setText(PrivateKeyArea.getText());
+                        KeyOwnerField1.setText(EmailTextField.getText());
+                    }
+                }
+            }
+        } 
+        catch (SAXException | IOException | ParserConfigurationException ex) {
+            Logger.getLogger(UserManager_GUI.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
     
     public static void main(String args[]) {
@@ -2296,39 +1759,46 @@ public class UserManager_GUI extends javax.swing.JFrame {
         java.awt.EventQueue.invokeLater(new Runnable() 
         {
             public void run() {
-                try 
-                {
-                    new UserManager_GUI().setVisible(true);
-                } 
-                catch (IOException | ParserConfigurationException | SAXException ex) 
-                {
-                    Logger.getLogger(UserManager_GUI.class.getName()).log(Level.SEVERE, null, ex);
-                }
+                Users.GUI.Login_GUI window = new Users.GUI.Login_GUI(); 
+                window.setLocationRelativeTo(null);
+                window.setVisible(true);
+//                while (window.result = true)
+//                {
+//                    window.setVisible(false);
+//                }
+//                if (window.result = true) 
+//                {
+//                    try {
+//                        UserManager_GUI window2 = new UserManager_GUI(window.userNameField.getText());
+//                    } catch (IOException ex) {
+//                        Logger.getLogger(UserManager_GUI.class.getName()).log(Level.SEVERE, null, ex);
+//                    } catch (ParserConfigurationException ex) {
+//                        Logger.getLogger(UserManager_GUI.class.getName()).log(Level.SEVERE, null, ex);
+//                    } catch (SAXException ex) {
+//                        Logger.getLogger(UserManager_GUI.class.getName()).log(Level.SEVERE, null, ex);
+//                    }
+//                }
             }
         });
     }
 
+    public String pathdir;
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenu About;
     private javax.swing.JPanel AccountInfo;
     private javax.swing.JPanel AccountPane;
-    private javax.swing.JButton AddUserButton;
+    private javax.swing.JButton AddContactButton;
     private javax.swing.JLabel AddrLabel;
     private javax.swing.JTextField AddrTextField;
     private javax.swing.JTextField AlgorithmField;
     private javax.swing.JTextField AlgorithmField1;
-    private javax.swing.JPanel AsymmetricTab;
     private javax.swing.JButton BrowseInputFile;
     private javax.swing.JButton BrowseInputFile1;
     private javax.swing.JButton BrowseOutputFile;
     private javax.swing.JButton BrowseOutputFile1;
-    private javax.swing.JTextArea CommandLine;
     private javax.swing.JTextArea CommandLine_Sym1;
     private javax.swing.JPanel ContactsPane;
-    private javax.swing.JButton CreateAccountButton;
-    private javax.swing.JButton CreateKeyPairButton;
     private javax.swing.JButton CreateKeyPairButton1;
-    private javax.swing.JButton DecryptButton;
     private javax.swing.JPanel DecryptTab;
     private javax.swing.JMenuItem DeleteContact;
     private javax.swing.JButton DeleteUserButton;
@@ -2340,26 +1810,12 @@ public class UserManager_GUI extends javax.swing.JFrame {
     private javax.swing.JTextField EmailTextField;
     private javax.swing.JButton EncryptButton;
     private javax.swing.JPanel EncryptTab;
-    private javax.swing.JMenuItem EncryptWithPublicKey;
     private javax.swing.JMenuItem ExportContactInfo;
     private javax.swing.JButton ExportInfoButton;
-    private javax.swing.JButton ExportPrivate;
-    private javax.swing.JButton ExportPrivate1;
-    private javax.swing.JButton ExportPublic;
-    private javax.swing.JButton ExportPublicKey;
-    private javax.swing.JButton ExportPublicKey1;
-    private javax.swing.JButton FileButton_1;
-    private javax.swing.JButton FileButton_2;
     private javax.swing.JPanel FileInfoPane;
     private javax.swing.JPanel FileInfoPane1;
-    private javax.swing.JButton GetPublicKeyButton;
     private javax.swing.JMenu Help;
     private javax.swing.JLabel HoTenLabel;
-    private javax.swing.JButton ImportPrivateKey;
-    private javax.swing.JButton ImportPrivateKey1;
-    private javax.swing.JButton ImportPublicKey;
-    private javax.swing.JButton ImportPublicKey1;
-    private javax.swing.JTextField InputFileField;
     private javax.swing.JTextField InputFileField_Sym;
     private javax.swing.JTextField InputFileField_Sym1;
     private javax.swing.JPanel KeyInfoPane;
@@ -2367,17 +1823,13 @@ public class UserManager_GUI extends javax.swing.JFrame {
     private javax.swing.JTextField KeyOwnerField;
     private javax.swing.JTextField KeyOwnerField1;
     private javax.swing.JPanel KeyPairInfo;
-    private javax.swing.JTextField KeySizeBox;
-    private javax.swing.JTextField KeySizeBox_Sym;
-    private javax.swing.JTextField KeySizeBox_Sym1;
     private javax.swing.JComboBox<String> KeySizeComboBox1;
     private javax.swing.JTextField KeySizeField;
     private javax.swing.JTextField KeySizeField1;
-    private javax.swing.JButton LoginButton;
+    private javax.swing.JButton LoadYourPrivateKey;
     private javax.swing.JMenuBar MenuBar;
     private javax.swing.JComboBox<String> ModOpComboBox;
     private javax.swing.JTextField NameField;
-    private javax.swing.JTextField OutputFileField;
     private javax.swing.JTextField OutputFileField_Sym;
     private javax.swing.JTextField OutputFileField_Sym1;
     private javax.swing.JComboBox<String> PadSchemeComboBox;
@@ -2385,17 +1837,15 @@ public class UserManager_GUI extends javax.swing.JFrame {
     private javax.swing.JLabel PasswordLabel;
     private javax.swing.JLabel PhoneLabel;
     private javax.swing.JTextField PhoneTextField;
-    private javax.swing.JTabbedPane PopUpTabbedPane;
     private javax.swing.JTextArea PrivateKeyArea;
     private javax.swing.JScrollPane PrivateKeyScrollPane;
     private javax.swing.JTextArea PublicKeyArea;
     private javax.swing.JScrollPane PublicKeyScrollPane;
     private javax.swing.JTextArea PublicKeyTextArea;
     private javax.swing.JButton RefreshButton;
+    private javax.swing.JButton SaveKeyPairToAccount;
     private javax.swing.JScrollPane ScrollUserPane;
-    private javax.swing.JComboBox<String> SessionKeyComboBox;
     private javax.swing.JPanel SessionKeyInfoPane;
-    private javax.swing.JMenuItem ShowContactInfo;
     private javax.swing.JButton SignButton;
     private javax.swing.JComboBox<String> SymAlgoComboBox;
     private javax.swing.JTabbedPane TabbedPane;
@@ -2403,40 +1853,22 @@ public class UserManager_GUI extends javax.swing.JFrame {
     private javax.swing.JPanel UserOperationPane;
     private javax.swing.JTable UserTable;
     private javax.swing.JButton VerifyButton;
-    private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
-    private javax.swing.JButton jButton9;
-    private javax.swing.JComboBox<String> jComboBox5;
-    private javax.swing.JComboBox<String> jComboBox6;
-    private javax.swing.JComboBox<String> jComboBox7;
-    private javax.swing.JComboBox<String> jComboBox8;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel10;
+    private javax.swing.JButton jButton3;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel13;
-    private javax.swing.JLabel jLabel14;
     private javax.swing.JLabel jLabel15;
     private javax.swing.JLabel jLabel16;
     private javax.swing.JLabel jLabel17;
     private javax.swing.JLabel jLabel18;
     private javax.swing.JLabel jLabel19;
-    private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel20;
     private javax.swing.JLabel jLabel21;
-    private javax.swing.JLabel jLabel22;
-    private javax.swing.JLabel jLabel23;
-    private javax.swing.JLabel jLabel24;
-    private javax.swing.JLabel jLabel25;
     private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
-    private javax.swing.JLabel jLabel7;
-    private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
-    private javax.swing.JPanel jPanel2;
-    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JSeparator jSeparator1;
