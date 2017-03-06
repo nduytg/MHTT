@@ -1,5 +1,6 @@
 package DCrypto;
-// Thư viện xử lý việc bảo mật
+// Nguyen Duc Duy - 1312084
+// Thư viện xử lý việc bảo mật chính của project
 // Bao gồm những chức năng chính sau:
 // Mã hóa đối xứng, bất đối xứng, hàm băm, chữ ký điện tử
 
@@ -25,7 +26,6 @@ import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-//import java.lang.String;
 
 public class DCrypto
 {
@@ -118,6 +118,7 @@ public class DCrypto
     // Algorithm: <theo_input>
     // Mode: <theo_input>
     // Tham so: Key, IV, Messsge
+    // NOTE: Chi encrypt STRING, ham Encrypt FILE o ben duoi
     public static String symEncryptMessage(String key, String message)
     {
         try 
@@ -146,6 +147,7 @@ public class DCrypto
         return null; 
     }
     
+    // NOTE: Chi encrypt STRING, ham Encrypt FILE o ben duoi
     public static String symDecryptMessage(String key, String cipherText)
     {
             try 
@@ -173,7 +175,9 @@ public class DCrypto
             return null;
     }
 
-    //Input: key, mode ma hoa, padding mode, file inpu, file output
+    // Ham encrypt file bang AES/Blowfish
+    // Input: key, mode ma hoa, padding mode, file inpu, file output
+    // Ex: symEncryptFile(symmetricKey,AES,CBC,PKCS5Padding,inputPath,outputPath);
     public static boolean symEncryptFile(String key, String algo, String mode, String padMode, String plainFile,String cipherFile)
     {
         FileInputStream iFile = null; 
@@ -233,16 +237,16 @@ public class DCrypto
         } 
         catch (NoSuchPaddingException | InvalidKeyException | UnsupportedEncodingException | InvalidAlgorithmParameterException ex) {
             Logger.getLogger(DCrypto.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (FileNotFoundException ex) {
+        } catch (FileNotFoundException | IllegalBlockSizeException | BadPaddingException ex) {
             Logger.getLogger(DCrypto.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException | NoSuchAlgorithmException ex) {
-            Logger.getLogger(DCrypto.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IllegalBlockSizeException | BadPaddingException ex) {
             Logger.getLogger(DCrypto.class.getName()).log(Level.SEVERE, null, ex);
         }
         return false;
     }
 
+    // Ham decrypt file bang AES/Blowfish
+    // Ex: symDecryptFile(symmetricKey,inputPath,outputPath);
     public static boolean symDecryptFile(String key, String cipherFile, String plainFile) throws IOException
     {
         //boolean result = false
@@ -305,9 +309,7 @@ public class DCrypto
         } 
         catch (FileNotFoundException ex) {
             Logger.getLogger(DCrypto.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException | NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException ex) {
-            Logger.getLogger(DCrypto.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IllegalBlockSizeException | BadPaddingException ex) {
+        } catch (IOException | NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException ex) {
             Logger.getLogger(DCrypto.class.getName()).log(Level.SEVERE, null, ex);
         }
         iFile.close();
@@ -316,7 +318,8 @@ public class DCrypto
         return false;
     }
     
-    //Ma hoa bang session key, sau do ma hoa session key bang public key va nhet vo file
+    // Ma hoa bang session key, sau do ma hoa session key bang public key RSA va chen session key nay vo file
+    // Ex: symEncryptFileAdvanced(rsaPublicKey,AES,sessionKeySize,CBC,PKCS5Padding,inputPath,outputPath);
     public static boolean symEncryptFileAdvanced(PublicKey publicKey, String algo, String sessionKeySize, String mode, String padMode, String plainFile, String cipherFile)
     {
         FileInputStream iFile = null; 
@@ -384,17 +387,16 @@ public class DCrypto
         } 
         catch (NoSuchPaddingException | InvalidKeyException | UnsupportedEncodingException | InvalidAlgorithmParameterException ex) {
             Logger.getLogger(DCrypto.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (FileNotFoundException ex) {
+        } catch (FileNotFoundException | IllegalBlockSizeException | BadPaddingException ex) {
             Logger.getLogger(DCrypto.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException | NoSuchAlgorithmException ex) {
-            Logger.getLogger(DCrypto.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IllegalBlockSizeException | BadPaddingException ex) {
             Logger.getLogger(DCrypto.class.getName()).log(Level.SEVERE, null, ex);
         }
         return false;
     }
 
-    //Giai ma session key bang private key, sau do giai ma file bang session key
+    //Giai ma session key bang private key RSA, sau do giai ma file bang session key
+    // Ex: symDecryptFileAdvanced(rsaPrivateKey,inputPath,outputPath);
     public static boolean symDecryptFileAdvanced(PrivateKey privateKey, String cipherFile, String plainFile) throws IOException
     {
         //boolean result = false
@@ -466,9 +468,7 @@ public class DCrypto
         } 
         catch (FileNotFoundException ex) {
             Logger.getLogger(DCrypto.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException | NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException ex) {
-            Logger.getLogger(DCrypto.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IllegalBlockSizeException | BadPaddingException ex) {
+        } catch (IOException | NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException ex) {
             Logger.getLogger(DCrypto.class.getName()).log(Level.SEVERE, null, ex);
         }
         iFile.close();
@@ -477,6 +477,7 @@ public class DCrypto
         return false;
     }
     
+    // Ma hoa file bang RSA KeyPair
     public static boolean RSAEncryptFile(PublicKey pubKey, String plainFile,String cipherFile) throws IOException
     {
         FileInputStream iFile = null; 
@@ -520,11 +521,7 @@ public class DCrypto
             System.out.println("Encryption completed!");
             return true;
             
-        } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException ex) { 
-            Logger.getLogger(DCrypto.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (FileNotFoundException ex) {
-            Logger.getLogger(DCrypto.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException | IOException ex) { 
             Logger.getLogger(DCrypto.class.getName()).log(Level.SEVERE, null, ex);
         }
         iFile.close();
@@ -533,6 +530,7 @@ public class DCrypto
         return false;
     }
     
+    // Giai ma file bang RSA KeyPair
     public static boolean RSADecryptFile(PrivateKey privateKey, String cipherFile, String plainFile)
     {
         //boolean result = false
@@ -581,14 +579,13 @@ public class DCrypto
         } 
         catch (FileNotFoundException ex) {
             Logger.getLogger(DCrypto.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException | NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException ex) {
-            Logger.getLogger(DCrypto.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IllegalBlockSizeException | BadPaddingException ex) {
+        } catch (IOException | NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException ex) {
             Logger.getLogger(DCrypto.class.getName()).log(Level.SEVERE, null, ex);
         }
         return false;
     }
 
+    // Ma hoa 1 chuoi STRING bang RSA
     public static String encryptRSAMessage(PublicKey key, String message)
     {
         try 
@@ -613,6 +610,7 @@ public class DCrypto
         return null;
     }
 
+    // Giai ma 1 chuoi STRING bang RSA
     public static String decryptRSAMessage(PrivateKey key, String cipherText)
     {
         try 
@@ -636,7 +634,7 @@ public class DCrypto
         return null;
     }
 
-    // Generate 2048-bit RSA Key Pair
+    // Generate RSA Key Pair
     public static KeyPair createRSAKeyPair(int keySize)
     {	
         try 
@@ -771,7 +769,6 @@ public class DCrypto
         catch (IOException e) 
         {
             // TODO Auto-generated catch block
-            e.printStackTrace();
         }
        return null;
     }
@@ -981,6 +978,3 @@ public class DCrypto
         return false;
     }
 }
-
-
-
