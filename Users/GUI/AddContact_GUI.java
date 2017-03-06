@@ -6,21 +6,29 @@
 package Users.GUI;
 
 import Users.User;
+import java.awt.HeadlessException;
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
+import org.xml.sax.SAXException;
 
 /**
  *
  * @author Quang Dai
  */
-public class CreateAccount_GUI extends javax.swing.JFrame {
+public class AddContact_GUI extends javax.swing.JFrame {
 
     /**
      * Creates new form CreateAccount_GUI
      */
-    public CreateAccount_GUI() {
+    public AddContact_GUI(String pathdir) {
         initComponents();
+        this.path = pathdir;
     }
 
     /**
@@ -36,51 +44,45 @@ public class CreateAccount_GUI extends javax.swing.JFrame {
         AccountInfoPane = new javax.swing.JPanel();
         Name = new javax.swing.JLabel();
         NameField = new javax.swing.JTextField();
-        PasswordField = new javax.swing.JPasswordField();
+        PublicKey = new javax.swing.JLabel();
         Email = new javax.swing.JLabel();
         EmailField = new javax.swing.JTextField();
-        Password1 = new javax.swing.JLabel();
         DoB = new javax.swing.JLabel();
         DoBField = new javax.swing.JTextField();
         Phone = new javax.swing.JLabel();
         PhoneField = new javax.swing.JTextField();
         Address = new javax.swing.JLabel();
         AddressField = new javax.swing.JTextField();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        PublicKeyTextArea = new javax.swing.JTextArea();
         ButtonsPane = new javax.swing.JPanel();
         CreateAccountButton = new javax.swing.JButton();
         CancelButton = new javax.swing.JButton();
-        jSeparator1 = new javax.swing.JSeparator();
-
-        setTitle("Tạo tài khoản");
-        setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
-        setLocation(new java.awt.Point(0, 0));
-        setResizable(false);
 
         jLabel7.setFont(new java.awt.Font("Tahoma", 1, 18)); // NOI18N
         jLabel7.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel7.setText("Create Account");
+        jLabel7.setText("Add Contact");
 
         AccountInfoPane.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
         Name.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         Name.setText("Name:");
 
-        NameField.setAutoscrolls(false);
-
-        PasswordField.setAutoscrolls(false);
+        PublicKey.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        PublicKey.setText("Public Key:");
 
         Email.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         Email.setText("Email:");
 
-        EmailField.setAutoscrolls(false);
-
-        Password1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        Password1.setText("Passphrase:");
+        EmailField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                EmailFieldActionPerformed(evt);
+            }
+        });
 
         DoB.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         DoB.setText("Date Of Birth:");
 
-        DoBField.setAutoscrolls(false);
         DoBField.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 DoBFieldActionPerformed(evt);
@@ -90,12 +92,15 @@ public class CreateAccount_GUI extends javax.swing.JFrame {
         Phone.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         Phone.setText("Phone:");
 
-        PhoneField.setAutoscrolls(false);
-
         Address.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         Address.setText("Address:");
 
-        AddressField.setAutoscrolls(false);
+        jScrollPane1.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+
+        PublicKeyTextArea.setColumns(20);
+        PublicKeyTextArea.setLineWrap(true);
+        PublicKeyTextArea.setRows(5);
+        jScrollPane1.setViewportView(PublicKeyTextArea);
 
         javax.swing.GroupLayout AccountInfoPaneLayout = new javax.swing.GroupLayout(AccountInfoPane);
         AccountInfoPane.setLayout(AccountInfoPaneLayout);
@@ -108,23 +113,28 @@ public class CreateAccount_GUI extends javax.swing.JFrame {
                         .addGroup(AccountInfoPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(Email)
                             .addComponent(Name))
-                        .addGap(62, 62, 62)
-                        .addGroup(AccountInfoPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(NameField, javax.swing.GroupLayout.DEFAULT_SIZE, 186, Short.MAX_VALUE)
+                        .addGap(58, 58, 58)
+                        .addGroup(AccountInfoPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(NameField)
                             .addComponent(EmailField)))
                     .addGroup(AccountInfoPaneLayout.createSequentialGroup()
                         .addGroup(AccountInfoPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(Password1)
+                            .addComponent(PublicKey)
                             .addComponent(DoB)
                             .addComponent(Phone)
                             .addComponent(Address))
-                        .addGap(26, 26, 26)
-                        .addGroup(AccountInfoPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(AddressField, javax.swing.GroupLayout.PREFERRED_SIZE, 186, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(DoBField, javax.swing.GroupLayout.PREFERRED_SIZE, 186, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(PasswordField, javax.swing.GroupLayout.PREFERRED_SIZE, 186, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(PhoneField, javax.swing.GroupLayout.PREFERRED_SIZE, 186, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGroup(AccountInfoPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addGroup(AccountInfoPaneLayout.createSequentialGroup()
+                                .addGap(22, 22, 22)
+                                .addGroup(AccountInfoPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(PhoneField, javax.swing.GroupLayout.DEFAULT_SIZE, 179, Short.MAX_VALUE)
+                                    .addComponent(AddressField)))
+                            .addGroup(AccountInfoPaneLayout.createSequentialGroup()
+                                .addGap(18, 18, 18)
+                                .addGroup(AccountInfoPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(DoBField, javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addComponent(jScrollPane1))))))
+                .addContainerGap())
         );
         AccountInfoPaneLayout.setVerticalGroup(
             AccountInfoPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -135,31 +145,33 @@ public class CreateAccount_GUI extends javax.swing.JFrame {
                     .addComponent(NameField, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(AccountInfoPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(EmailField, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(EmailField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(Email))
+                .addGap(8, 8, 8)
+                .addGroup(AccountInfoPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(AccountInfoPaneLayout.createSequentialGroup()
+                        .addComponent(PublicKey, javax.swing.GroupLayout.PREFERRED_SIZE, 12, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 97, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(AccountInfoPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(DoBField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(DoB))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(AccountInfoPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(PasswordField, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(Password1))
+                    .addComponent(PhoneField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(Phone))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(AccountInfoPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(DoB)
-                    .addComponent(DoBField, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(AccountInfoPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(Phone)
-                    .addComponent(PhoneField, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(AccountInfoPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(Address)
-                    .addComponent(AddressField, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(AddressField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(Address))
+                .addContainerGap())
         );
 
         ButtonsPane.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
         CreateAccountButton.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
-        CreateAccountButton.setText("Create");
+        CreateAccountButton.setText("Add");
         CreateAccountButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 CreateAccountButtonActionPerformed(evt);
@@ -180,9 +192,9 @@ public class CreateAccount_GUI extends javax.swing.JFrame {
         ButtonsPaneLayout.setHorizontalGroup(
             ButtonsPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(ButtonsPaneLayout.createSequentialGroup()
-                .addGap(22, 22, 22)
+                .addContainerGap(20, Short.MAX_VALUE)
                 .addComponent(CreateAccountButton, javax.swing.GroupLayout.PREFERRED_SIZE, 109, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(30, 30, 30)
                 .addComponent(CancelButton, javax.swing.GroupLayout.PREFERRED_SIZE, 109, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(20, 20, 20))
         );
@@ -190,9 +202,9 @@ public class CreateAccount_GUI extends javax.swing.JFrame {
             ButtonsPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(ButtonsPaneLayout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(ButtonsPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(CancelButton, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(CreateAccountButton, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(ButtonsPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(CancelButton, javax.swing.GroupLayout.DEFAULT_SIZE, 40, Short.MAX_VALUE)
+                    .addComponent(CreateAccountButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
 
@@ -203,27 +215,23 @@ public class CreateAccount_GUI extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(AccountInfoPane, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(ButtonsPane, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jSeparator1, javax.swing.GroupLayout.Alignment.TRAILING))
-                .addContainerGap())
-            .addGroup(layout.createSequentialGroup()
-                .addGap(91, 91, 91)
-                .addComponent(jLabel7)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(AccountInfoPane, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(ButtonsPane, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(17, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 121, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(102, 102, 102))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(6, 6, 6)
-                .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(AccountInfoPane, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(ButtonsPane, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
 
         pack();
@@ -234,40 +242,31 @@ public class CreateAccount_GUI extends javax.swing.JFrame {
         
         User user = new User();
         
-        //Public key va private key luc khoi tao la rong
-        String pub = "";
-        String pri = "";
-        
         String email = "";
         email = this.EmailField.getText();
         
-        String pass = "";
-        pass = this.PasswordField.getText();
-       
-        try {
-            if (!(email.equals("")) && (!(pass.equals(""))))
+        String pub = "";
+        pub = this.PublicKeyTextArea.getText();
+        
+        try 
+        {
+            if (!(email.equals("")))
             {
                 String name = this.NameField.getText();
                 String dateofbirth = this.DoBField.getText();
                 String phone = this.PhoneField.getText();
                 String add = this.AddressField.getText();
-                boolean check = user.Sign_In(name, email, pass, pub, pri, dateofbirth, phone, add);
-                if (check == true)
-                {    
-                    JOptionPane.showMessageDialog(null, "Create Successful!!!", "CREATE", JOptionPane.WARNING_MESSAGE);
-                    this.setVisible(false);
-                }
-                else
-                {
-                    JOptionPane.showMessageDialog(null, "Create Unsuccessful!!!", "CREATE", JOptionPane.WARNING_MESSAGE);
-                }
+                user.Add_Account(path, name, email, pub, dateofbirth, phone, add);
+                JOptionPane.showMessageDialog(null, "Add Successful!!!", "ADD", JOptionPane.WARNING_MESSAGE);
             }
             else
             {
-                JOptionPane.showMessageDialog(null, "Create Unsuccessful!!!", "CREATE", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(null, "Add Unsuccessful!!!", "ADD", JOptionPane.WARNING_MESSAGE);
             }
-        } catch (Exception ex) {
-            Logger.getLogger(CreateAccount_GUI.class.getName()).log(Level.SEVERE, null, ex);
+        } 
+        catch (HeadlessException | IOException | NoSuchAlgorithmException | InvalidKeySpecException | ParserConfigurationException | TransformerException | SAXException ex) 
+        {
+            Logger.getLogger(AddContact_GUI.class.getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_CreateAccountButtonActionPerformed
 
@@ -280,43 +279,12 @@ public class CreateAccount_GUI extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_DoBFieldActionPerformed
 
-//    /**
-//     * @param args the command line arguments
-//     */
-//    public static void main(String args[]) 
-//    {
-//        /* Set the Nimbus look and feel */
-//        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-//        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-//         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-//         */
-//        try {
-//            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-//                if ("Nimbus".equals(info.getName())) {
-//                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-//                    break;
-//                }
-//            }
-//        } catch (ClassNotFoundException ex) {
-//            java.util.logging.Logger.getLogger(CreateAccount_GUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-//        } catch (InstantiationException ex) {
-//            java.util.logging.Logger.getLogger(CreateAccount_GUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-//        } catch (IllegalAccessException ex) {
-//            java.util.logging.Logger.getLogger(CreateAccount_GUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-//        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-//            java.util.logging.Logger.getLogger(CreateAccount_GUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-//        }
-//        //</editor-fold>
-//
-//        /* Create and display the form */
-//        java.awt.EventQueue.invokeLater(new Runnable() 
-//        {
-//            public void run() {
-//                new CreateAccount_GUI().setVisible(true);
-//            }
-//        });
-//    }
+    private void EmailFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_EmailFieldActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_EmailFieldActionPerformed
 
+    
+    private String path;
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel AccountInfoPane;
     private javax.swing.JLabel Address;
@@ -330,11 +298,11 @@ public class CreateAccount_GUI extends javax.swing.JFrame {
     private javax.swing.JTextField EmailField;
     private javax.swing.JLabel Name;
     private javax.swing.JTextField NameField;
-    private javax.swing.JLabel Password1;
-    private javax.swing.JPasswordField PasswordField;
     private javax.swing.JLabel Phone;
     private javax.swing.JTextField PhoneField;
+    private javax.swing.JLabel PublicKey;
+    private javax.swing.JTextArea PublicKeyTextArea;
     private javax.swing.JLabel jLabel7;
-    private javax.swing.JSeparator jSeparator1;
+    private javax.swing.JScrollPane jScrollPane1;
     // End of variables declaration//GEN-END:variables
 }
